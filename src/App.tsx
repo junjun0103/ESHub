@@ -1,68 +1,32 @@
-import "./App.css"
-import { Counter } from "./features/counter/Counter"
-import { Quotes } from "./features/quotes/Quotes"
-import logo from "./logo.svg"
+import type React from "react"
+import './App.css';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
+import Home from "./pages/Home"
+import SignUp from "./pages/SignUp"
+import SignIn from "./pages/SignIn"
+import Profile from './pages/Profile';
+import EscortDetail from './components/escort/EscortDetail';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
-const App = () => {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <Quotes />
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://reselect.js.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Reselect
-          </a>
-        </span>
-      </header>
-    </div>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/escort/:id" element={<EscortDetail />} />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute requiredRole="escort">
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App
