@@ -108,8 +108,6 @@ const EscortProfileContent: React.FC = () => {
     }
   };
 
-  // ... rest of the component (navigation rendering) remains the same
-
   return (
     <div>
       {/* Mobile and Tablet Navigation */}
