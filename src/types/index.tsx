@@ -20,6 +20,8 @@ export interface Story {
   description: string
   createdAt: number
   expiresAt: number // 24 hours after createdAt
+  suburb: string
+  region: string
   views: number
 }
 

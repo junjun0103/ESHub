@@ -63,7 +63,7 @@ const mockEscorts: Escort[] = [
     },
     verificationStatus: "verified",
     verifiedDate: Date.now(),
-    isProfileActive: true,
+    isProfileActive: false,
     isReviewActive: true,
     eventDescription: "An elegant evening at the opera",
     occupation: "Model",

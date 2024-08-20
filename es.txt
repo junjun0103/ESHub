@@ -1,0 +1,61 @@
+// File: /Users/jun/Desktop/junjun0103/escorthub/tsconfig.node.json
+//--------------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+// File: /Users/jun/Desktop/junjun0103/escorthub/index.html
+//--------------------------------------------------------------------------------
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React Redux App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+
+// File: /Users/jun/Desktop/junjun0103/escorthub/tailwind.config.js
+//--------------------------------------------------------------------------------
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#1a202c',
+        secondary: '#2d3748',
+        accent: {
+          gold: '#d4af37',
+          silver: '#C0C0C0',
+        },
+      },
+      fontFamily: {
+        sans: ['Helvetica', 'Arial', 'sans-serif'],
+        serif: ['Georgia', 'Times New Roman', 'serif'],
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
+}
+
+// File: /Users/jun/Desktop/junjun0103/escorthub/.DS_Store
+//--------------------------------------------------------------------------------

@@ -214,7 +214,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
             className="text-xl font-semibold mb-2 cursor-pointer"
             onClick={() => toggleSection("greeting")}
           >
-            Greeting {openSections.greeting ? "▼" : "▶"}
+            Greeting* {openSections.greeting ? "▼" : "▶"}
           </h3>
           {openSections.greeting && (
             <div className="space-y-4">
@@ -405,7 +405,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
             className="text-xl font-semibold mb-2 cursor-pointer"
             onClick={() => toggleSection("professionalInfo")}
           >
-            Professional Information{" "}
+            Professional Information*{" "}
             {openSections.professionalInfo ? "▼" : "▶"}
           </h3>
           {openSections.professionalInfo && (
@@ -525,7 +525,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
             className="text-xl font-semibold mb-2 cursor-pointer"
             onClick={() => toggleSection("about")}
           >
-            About Me {openSections.about ? "▼" : "▶"}
+            About Me* {openSections.about ? "▼" : "▶"}
           </h3>
           {openSections.about && (
             <div>
