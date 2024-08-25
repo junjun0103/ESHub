@@ -64,15 +64,18 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
           ),
         )
 
-        const now = Date.now()
         await addStory({
           userId: user.id,
           imageUrls,
           description: newStoryDescription,
-          createdAt: now,
-          expiresAt: now + 24 * 60 * 60 * 1000, // 24 hours from now
+          createdAt: new Date("2024-08-20T18:00:00Z"),
+          expiresAt: new Date(
+            new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
+          ),
           suburb: profile.suburb,
-          region: profile.region,
+          location: profile.location,
+          latitude: -33.8568,
+          longitude: 151.2153,
           views: 0,
         })
 
@@ -92,10 +95,18 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
     deleteStory(storyId)
   }
 
-  const getTimeLeft = (expiresAt: number) => {
-    const timeLeft = expiresAt - Date.now()
+  const getTimeLeft = (expiresAt: Date): string => {
+    const timeLeft = expiresAt.getTime() - Date.now()
     const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
-    return hoursLeft > 0 ? `${hoursLeft} hours left` : "Expiring soon"
+
+    if (hoursLeft > 0) {
+      return `${hoursLeft} hour${hoursLeft > 1 ? "s" : ""} left`
+    } else {
+      const minutesLeft = Math.floor(timeLeft / (1000 * 60))
+      return minutesLeft > 0
+        ? `${minutesLeft} minute${minutesLeft > 1 ? "s" : ""} left`
+        : "Expiring soon"
+    }
   }
 
   const getWordCount = (str: string) => {

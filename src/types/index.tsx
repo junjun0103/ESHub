@@ -2,14 +2,18 @@
 export interface User {
   id: string
   email: string
-  userType: "escort" | "customer"
+  userType: "escort" | "customer" | "superAdmin"
   name: string
-  vipMembership?: VIPMembership
+  vipMembership?: VIPMembership // for customer only
+  favorites?: []
+  likes?: []
+  createdAt?: Date
 }
 
 export interface VIPMembership {
-  startDate: string
-  endDate: string
+  tier: "Standard" | "Premium" | "Diamond"
+  startDate: Date
+  endDate: Date
 }
 
 // Stories
@@ -18,10 +22,12 @@ export interface Story {
   userId: string
   imageUrls: string[]
   description: string
-  createdAt: number
-  expiresAt: number // 24 hours after createdAt
+  createdAt: Date
+  expiresAt: Date // 24 hours after createdAt
   suburb: string
-  region: string
+  location: string
+  latitude: number
+  longitude: number
   views: number
 }
 
@@ -32,15 +38,21 @@ export interface Escort {
   name: string
   age: number
   greeting?: string
-  about: string
+  aboutMe: string
+  timeTable: TimeTable[]
+  availability: string
   suburb: string
-  region: string
-  services: string[]
-  hourlyRate: number
+  location: string
+  latitude: number
+  longitude: number
+  baseServices: string[]
+  extraServices?: string[]
   profilePhotos: string[] // Maximum 3 photos
-  photos: string[] // Maximum 10 photos
+  detailPhotos: string[] // Maximum 10 photos
+  selfiePhotos?: string[] // Maximum 10 photos
   videos?: string[] // Maximum 3 videos
-  nationality?: string
+  ethnicity?: string
+  contacts: Contact[]
   height: number
   weight: number
   hairColor?: string
@@ -49,18 +61,20 @@ export interface Escort {
   bodyType?: string
   smoker?: boolean
   languages?: Array<Language>
-  priceTable?: PriceEntry[]
+  ratesTable?: RatesEntry[]
+  ratesDescription?: string
   paymentPlan?: {
     tier: "Standard" | "Premium" | "Diamond"
     duration: string
-    startDate: string
-    endDate: string
+    startDate: Date
+    endDate: Date
   }
   isProfileActive?: boolean
   isReviewActive?: boolean
+  isPreferencesActive?: boolean
   verificationStatus?: "unverified" | "pending" | "verified"
   verifiedDate?: number
-  specialEvent?: boolean
+  isSpecialEventActive?: boolean
   eventDescription?: string
   occupation?: string
   escortType?: string
@@ -70,10 +84,14 @@ export interface Escort {
   experiencePace?: string
   touchPreference?: string
   roleplayPreference?: string
+  likes?: number
+  createdAt: Date
+  lastUpdate: Date
+  LastLogin: Date
 }
 
 // PriceTable
-export interface PriceEntry {
+export interface RatesEntry {
   duration: number
   incall: number
   outcall: number
@@ -84,4 +102,54 @@ export interface PriceEntry {
 export interface Language {
   name: string
   level: string
+}
+
+export interface Contact {
+  name: string
+  detail: string
+}
+
+export interface TimeTable {
+  day: string
+  from: string
+  untill: string
+}
+
+// QuestionAnswer
+export interface QuestionAnswer {
+  id: string
+  writerUserId: string
+  escortUserId: string
+  escortId: string
+  question: string
+  answer?: {
+    text: string
+    isPrivate?: boolean
+    createdAt: Date
+  }
+  isPrivate?: boolean
+  createdAt: Date
+}
+
+// Review
+export interface Review {
+  id: string
+  writerUserId: string
+  escortUserId: string
+  escortId: string
+  review: string
+  answer?: {
+    text: string
+    isPrivate?: boolean
+    createdAt: Date
+  }
+  rating: ReviewRating[]
+  isPrivate?: boolean
+  createdAt: Date
+}
+
+export interface ReviewRating {
+  id: string
+  name: string
+  rating: number
 }

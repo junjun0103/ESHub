@@ -20,7 +20,7 @@ import { fetchStoriesByUserId } from "../../../features/stories/storiesAPI"
 import InformationManagement from "./InformationManagement"
 import MediaSection from "./MediaSection"
 import PaymentPlans from "./PaymentPlans"
-import PriceTable from "./PriceTable"
+import RatesTable from "./RatesTable"
 import ServiceSection from "./ServiceSection"
 import Dashboard from "./Dashboard"
 import StoriesSection from "./StoriesSection"
@@ -95,7 +95,7 @@ const EscortProfileContent: React.FC = () => {
     { id: "information", label: "Information" },
     { id: "media", label: "Media" },
     { id: "payment", label: "Payment Plans" },
-    { id: "prices", label: "Price Table" },
+    { id: "rates", label: "Rates Table" },
     { id: "services", label: "Services" },
     { id: "stories", label: "Stories" },
     { id: "verification", label: "Verification" },
@@ -144,9 +144,9 @@ const EscortProfileContent: React.FC = () => {
             onUpdate={handleUpdateProfile}
           />
         )
-      case "prices":
+      case "rates":
         return (
-          <PriceTable profile={escortProfile} onUpdate={handleUpdateProfile} />
+          <RatesTable profile={escortProfile} onUpdate={handleUpdateProfile} />
         )
       case "services":
         return (

@@ -9,6 +9,7 @@ import {
   deleteDoc,
   query,
   where,
+  addDoc,
 } from "firebase/firestore"
 import {
   ref,
@@ -32,6 +33,11 @@ export const getDocument = async (collectionName: string, id: string) => {
   const docRef = doc(db, collectionName, id)
   const docSnap = await getDoc(docRef)
   return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null
+}
+
+export const addDocument = async (collectionName: string, data: any) => {
+  const docRef = await addDoc(collection(db, collectionName), data)
+  return { id: docRef.id, ...data }
 }
 
 export const setDocument = async (

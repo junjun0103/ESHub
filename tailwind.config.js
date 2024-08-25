@@ -6,20 +6,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#1a202c',
-        secondary: '#2d3748',
-        accent: {
-          gold: '#d4af37',
-          silver: '#C0C0C0',
+        'accent-gold': '#D4AF37',
+        'gray': {
+          900: '#121212',
+          800: '#1E1E1E',
+          700: '#2D2D2D',
+          // ... other shades
         },
       },
       fontFamily: {
+        serif: ['Baskerville', 'Georgia', 'serif'],
         sans: ['Helvetica', 'Arial', 'sans-serif'],
-        serif: ['Georgia', 'Times New Roman', 'serif'],
       },
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
+    require('@tailwindcss/aspect-ratio'),
   ],
 }

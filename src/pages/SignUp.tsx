@@ -1,37 +1,39 @@
-import type React from 'react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../app/hooks';
-import { setUser, setStatus, setError } from '../features/user/userSlice';
-import { signUp } from '../utils/firebase';
-import Layout from '../components/common/Layout';
+import type React from "react"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAppDispatch } from "../app/hooks"
+import { setUser, setStatus, setError } from "../features/user/userSlice"
+import { signUp } from "../utils/firebase"
+import Layout from "../components/common/Layout"
 
 const SignUp: React.FC = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [userType, setUserType] = useState<'escort' | 'customer'>('escort');
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [passwordConfirm, setPasswordConfirm] = useState("")
+  const [userType, setUserType] = useState<"escort" | "customer">("escort")
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(setStatus('loading'));
+    e.preventDefault()
+    dispatch(setStatus("loading"))
     try {
-      const userCredential = await signUp(email, password);
+      const userCredential = await signUp(email, password)
       // Here you would typically also save additional user info to your database
-      dispatch(setUser({
-        id: userCredential.user.uid,
-        email: userCredential.user.email!,
-        name,
-        userType,
-      }));
-      navigate('/');
+      dispatch(
+        setUser({
+          id: userCredential.user.uid,
+          email: userCredential.user.email!,
+          name,
+          userType,
+        }),
+      )
+      navigate("/")
     } catch (error) {
-      dispatch(setError((error as Error).message));
+      dispatch(setError((error as Error).message))
     }
-  };
+  }
 
   return (
     <Layout>
@@ -39,45 +41,53 @@ const SignUp: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Sign Up</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block mb-1">Name</label>
+            <label htmlFor="name" className="block mb-1">
+              Name
+            </label>
             <input
               type="text"
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               className="w-full p-2 border rounded"
               required
             />
           </div>
           <div>
-            <label htmlFor="email" className="block mb-1">Email</label>
+            <label htmlFor="email" className="block mb-1">
+              Email
+            </label>
             <input
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="w-full p-2 border rounded"
               required
             />
           </div>
           <div>
-            <label htmlFor="password" className="block mb-1">Password</label>
+            <label htmlFor="password" className="block mb-1">
+              Password
+            </label>
             <input
               type="password"
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               className="w-full p-2 border rounded"
               required
             />
           </div>
           <div>
-            <label htmlFor="password Confirm" className="block mb-1">Password Confrim</label>
+            <label htmlFor="password Confirm" className="block mb-1">
+              Password Confrim
+            </label>
             <input
               type="password"
               id="passwordConfirm"
               value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
+              onChange={e => setPasswordConfirm(e.target.value)}
               className="w-full p-2 border rounded"
               required
             />
@@ -89,8 +99,8 @@ const SignUp: React.FC = () => {
                 className="form-radio text-accent-gold focus:ring-accent-gold h-5 w-5"
                 name="userType"
                 value="escort"
-                checked={userType === 'escort'}
-                onChange={() => setUserType('escort')}
+                checked={userType === "escort"}
+                onChange={() => setUserType("escort")}
               />
               <span className="ml-2 text-gray-700">Customer</span>
             </label>
@@ -100,8 +110,8 @@ const SignUp: React.FC = () => {
                 className="form-radio text-accent-gold focus:ring-accent-gold h-5 w-5"
                 name="userType"
                 value="customer"
-                checked={userType === 'customer'}
-                onChange={() => setUserType('customer')}
+                checked={userType === "customer"}
+                onChange={() => setUserType("customer")}
               />
               <span className="ml-2 text-gray-700">Escort</span>
             </label>
@@ -115,7 +125,7 @@ const SignUp: React.FC = () => {
         </form>
       </div>
     </Layout>
-  );
-};
+  )
+}
 
-export default SignUp;
+export default SignUp

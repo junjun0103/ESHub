@@ -1,8 +1,12 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import Select from "react-select"
-import type { Escort, Language } from "../../../types"
+import type { Escort, Language, Contact, TimeTable } from "../../../types"
 import PreferencesSection from "./components/PreferencesSection" // adjust the path as necessary
+import LanguagesAndSmoking from "./components/LanguagesAndSmoking"
+import AboutMe from "../../../pages/components/AboutMe"
+import AboutMeSection from "./components/AboutMeSection"
+import AvailabilitySection from "./components/AvailabilitySection"
 
 interface InformationManagementProps {
   profile: Escort | null
@@ -18,8 +22,8 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [name, setName] = useState(profile?.name || "")
   const [age, setAge] = useState(profile?.age?.toString() || "")
   const [suburb, setSuburb] = useState(profile?.suburb || "")
-  const [region, setRegion] = useState(profile?.region || "")
-  const [nationality, setNationality] = useState(profile?.nationality || "")
+  const [location, setLocation] = useState(profile?.location || "")
+  const [ethnicity, setEthnicity] = useState(profile?.ethnicity || "")
   const [height, setHeight] = useState(profile?.height?.toString() || "")
   const [weight, setWeight] = useState(profile?.weight?.toString() || "")
   const [hairColor, setHairColor] = useState(profile?.hairColor || "")
@@ -30,9 +34,15 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [languages, setLanguages] = useState<Language[]>(
     profile?.languages || [],
   )
-  const [about, setAbout] = useState(profile?.about || "")
-  const [specialEvent, setSpecialEvent] = useState(
-    profile?.specialEvent || false,
+  const [contacts, setContacts] = useState<Contact[]>(profile?.contacts || [])
+  const [aboutMe, setAboutMe] = useState(profile?.aboutMe || "")
+  const [availability, setAvailability] = useState(profile?.availability || "")
+  const [timeTable, setTimeTable] = useState<TimeTable[]>(
+    profile?.timeTable || [],
+  )
+
+  const [isSpecialEventActive, setIsSpecialEventActive] = useState(
+    profile?.isSpecialEventActive || false,
   )
   const [eventDescription, setEventDescription] = useState(
     profile?.eventDescription || "",
@@ -55,17 +65,21 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [roleplayPreference, setRoleplayPreference] = useState(
     profile?.roleplayPreference || "",
   )
+  const [isPreferencesActive, setIsPreferencesActive] = useState(
+    profile?.isPreferencesActive || false,
+  )
 
   // State for collapsible sections
   const [openSections, setOpenSections] = useState({
-    greeting: true,
+    greeting: false,
     personalInfo: false,
     physicalAttributes: false,
     languagesAndSmoking: false,
     professionalInfo: false,
     preferences: false,
     specialEvent: false,
-    about: false,
+    aboutMe: false,
+    availability: false,
   })
 
   const suburbOptions = [
@@ -75,7 +89,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     // Add more options as needed
   ]
 
-  const regionOptions = [
+  const locationOptions = [
     { value: "Sydney", label: "Sydney" },
     { value: "Melbourne", label: "Melbourne" },
     { value: "Brisbane", label: "Brisbane" },
@@ -88,8 +102,8 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
       setName(profile.name || "")
       setAge(profile.age?.toString() || "")
       setSuburb(profile.suburb || "")
-      setRegion(profile.region || "")
-      setNationality(profile.nationality || "")
+      setLocation(profile.location || "")
+      setEthnicity(profile.ethnicity || "")
       setHeight(profile.height?.toString() || "")
       setWeight(profile.weight?.toString() || "")
       setHairColor(profile.hairColor || "")
@@ -98,8 +112,10 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
       setBodyType(profile.bodyType || "")
       setSmoker(profile.smoker || false)
       setLanguages(profile.languages || [])
-      setAbout(profile.about || "")
-      setSpecialEvent(profile.specialEvent || false)
+      setContacts(profile.contacts || [])
+      setAboutMe(profile.aboutMe || "")
+      setAvailability(profile.availability || "")
+      setIsSpecialEventActive(profile.isSpecialEventActive || false)
       setEventDescription(profile.eventDescription || "")
       setOccupation(profile.occupation || "")
       setEscortType(profile.escortType || "")
@@ -119,8 +135,8 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
       name,
       age: parseInt(age),
       suburb,
-      region,
-      nationality,
+      location,
+      ethnicity,
       height: parseInt(height),
       weight: parseInt(weight),
       hairColor,
@@ -129,8 +145,9 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
       bodyType,
       smoker,
       languages,
-      about,
-      specialEvent,
+      contacts,
+      aboutMe,
+      isSpecialEventActive,
       eventDescription,
       occupation,
       escortType,
@@ -151,7 +168,8 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     | "professionalInfo"
     | "preferences"
     | "specialEvent"
-    | "about"
+    | "aboutMe"
+    | "availability"
 
   const toggleSection = (section: SectionKey) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }))
@@ -174,6 +192,42 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     const updatedLanguages = [...languages]
     updatedLanguages[index][field] = value
     setLanguages(updatedLanguages)
+  }
+
+  const addContact = () => {
+    setContacts([...contacts, { name: "", detail: "" }])
+  }
+
+  const removeContact = (index: number) => {
+    setContacts(contacts.filter((_, i) => i !== index))
+  }
+
+  const updateContact = (
+    index: number,
+    field: "name" | "detail",
+    value: string,
+  ) => {
+    const updatedContacts = [...contacts]
+    updatedContacts[index][field] = value
+    setContacts(updatedContacts)
+  }
+
+  const addTimeTable = () => {
+    setTimeTable([...timeTable, { day: "Monday", from: "", untill: "" }])
+  }
+
+  const removeTimeTable = (index: number) => {
+    setTimeTable(timeTable.filter((_, i) => i !== index))
+  }
+
+  const updateTimeTable = (
+    index: number,
+    field: "day" | "from" | "untill",
+    value: string,
+  ) => {
+    const updatedTimeTable = [...timeTable]
+    updatedTimeTable[index][field] = value
+    setTimeTable(updatedTimeTable)
   }
 
   // Helper function to render form fields
@@ -238,19 +292,21 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
                   classNamePrefix="react-select"
                 />
               </div>
-              {/* Region Selector with Search */}
+              {/* Location Selector with Search */}
               <div>
                 <label
-                  htmlFor="region"
+                  htmlFor="location"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Region
+                  Location
                 </label>
                 <Select
-                  id="region"
-                  value={regionOptions.find(option => option.value === region)}
-                  onChange={option => setRegion(option?.value || "")}
-                  options={regionOptions}
+                  id="location"
+                  value={locationOptions.find(
+                    option => option.value === location,
+                  )}
+                  onChange={option => setLocation(option?.value || "")}
+                  options={locationOptions}
                   className="mt-1 text-gray-700"
                   classNamePrefix="react-select"
                 />
@@ -259,142 +315,46 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           )}
         </div>
 
-        {/* Personal Information Section */}
+        {/* aboutMe Section */}
         <div>
           <h3
             className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("personalInfo")}
+            onClick={() => toggleSection("aboutMe")}
           >
-            Personal Information {openSections.personalInfo ? "▼" : "▶"}
+            about Me and Contacts* {openSections.aboutMe ? "▼" : "▶"}
           </h3>
-          {openSections.personalInfo && (
+          {openSections.aboutMe && (
             <div className="space-y-4">
-              {renderField("Nationality", nationality, setNationality)}
-              {renderField("Occupation", occupation, setOccupation)}
+              <AboutMeSection
+                aboutMe={aboutMe}
+                setAboutMe={setAboutMe}
+                contacts={contacts}
+                addContact={addContact}
+                updateContact={updateContact}
+                removeContact={removeContact}
+              />
             </div>
           )}
         </div>
 
-        {/* Physical Attributes Section */}
+        {/* Availability Section */}
         <div>
           <h3
             className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("physicalAttributes")}
+            onClick={() => toggleSection("availability")}
           >
-            Physical Attributes {openSections.physicalAttributes ? "▼" : "▶"}
+            Availability* {openSections.availability ? "▼" : "▶"}
           </h3>
-          {openSections.physicalAttributes && (
+          {openSections.availability && (
             <div className="space-y-4">
-              {renderField("Height (cm)", height, setHeight, "number")}
-              {renderField("Weight (kg)", weight, setWeight, "number")}
-              {renderField("Hair Color", hairColor, setHairColor)}
-              {renderField("Hair Length", hairLength, setHairLength)}
-              {renderField("Bust Size", bustSize, setBustSize)}
-              {renderField("Body Type", bodyType, setBodyType)}
-            </div>
-          )}
-        </div>
-
-        {/* Languages and Smoking Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("languagesAndSmoking")}
-          >
-            Languages and Smoking{" "}
-            {openSections.languagesAndSmoking ? "▼" : "▶"}
-          </h3>
-          {openSections.languagesAndSmoking && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Languages
-                </label>
-                <table className="w-full mb-2 text-sm">
-                  <thead>
-                    <tr>
-                      <th className="text-left p-2 text-gray-300">Language</th>
-                      <th className="text-left p-2 text-gray-300">
-                        Proficiency
-                      </th>
-                      <th className="text-left p-2 text-gray-300">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {languages.map((lang, index) => (
-                      <tr key={index} className="border-b border-gray-700">
-                        <td className="py-2">
-                          <input
-                            type="text"
-                            value={lang.name}
-                            onChange={e =>
-                              updateLanguage(index, "name", e.target.value)
-                            }
-                            className="w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                          />
-                        </td>
-                        <td className="py-2">
-                          <select
-                            value={lang.level}
-                            onChange={e =>
-                              updateLanguage(index, "level", e.target.value)
-                            }
-                            className="w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                          >
-                            <option value="Basic">Basic</option>
-                            <option value="Conversational">
-                              Conversational
-                            </option>
-                            <option value="Fluent">Fluent</option>
-                            <option value="Native">Native</option>
-                          </select>
-                        </td>
-                        <td className="py-2">
-                          <button
-                            type="button"
-                            onClick={() => removeLanguage(index)}
-                            className="text-red-400 hover:text-red-300 transition-colors p-1"
-                            aria-label="Remove language"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button
-                  type="button"
-                  onClick={addLanguage}
-                  className="bg-accent-gold text-gray-900 px-4 py-2 rounded hover:bg-opacity-80 transition-colors"
-                  disabled={languages.length >= 5}
-                >
-                  Add Language
-                </button>
-              </div>
-
-              <div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={smoker}
-                    onChange={e => setSmoker(e.target.checked)}
-                    className="rounded border-gray-700 text-accent-gold focus:ring-accent-gold h-4 w-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-300">Smoker</span>
-                </label>
-              </div>
+              <AvailabilitySection
+                availability={availability}
+                setAvailability={setAvailability}
+                timeTable={timeTable}
+                addTimeTable={addTimeTable}
+                updateTimeTable={updateTimeTable}
+                removeTimeTable={removeTimeTable}
+              />
             </div>
           )}
         </div>
@@ -449,6 +409,113 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           )}
         </div>
 
+        {/* Special Event Section */}
+        <div>
+          <h3
+            className="text-xl font-semibold mb-2 cursor-pointer"
+            onClick={() => toggleSection("specialEvent")}
+          >
+            Special Event {openSections.specialEvent ? "▼" : "▶"}
+          </h3>
+          {openSections.specialEvent && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between relative">
+                <span className="cursor-pointer">
+                  Special Event Active Status
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={isSpecialEventActive || false}
+                    onChange={() =>
+                      setIsSpecialEventActive(!isSpecialEventActive)
+                    }
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-gold rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-gold"></div>
+                </label>
+              </div>
+
+              {isSpecialEventActive && (
+                <div>
+                  <label
+                    htmlFor="eventDescription"
+                    className="block text-sm font-medium text-gray-300"
+                  >
+                    Event Description
+                  </label>
+                  <textarea
+                    id="eventDescription"
+                    value={eventDescription}
+                    onChange={e => setEventDescription(e.target.value)}
+                    rows={4}
+                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Personal Information Section */}
+        <div>
+          <h3
+            className="text-xl font-semibold mb-2 cursor-pointer"
+            onClick={() => toggleSection("personalInfo")}
+          >
+            Personal Information {openSections.personalInfo ? "▼" : "▶"}
+          </h3>
+          {openSections.personalInfo && (
+            <div className="space-y-4">
+              {renderField("Ethnicity", ethnicity, setEthnicity)}
+              {renderField("Occupation", occupation, setOccupation)}
+            </div>
+          )}
+        </div>
+
+        {/* Physical Attributes Section */}
+        <div>
+          <h3
+            className="text-xl font-semibold mb-2 cursor-pointer"
+            onClick={() => toggleSection("physicalAttributes")}
+          >
+            Physical Attributes {openSections.physicalAttributes ? "▼" : "▶"}
+          </h3>
+          {openSections.physicalAttributes && (
+            <div className="space-y-4">
+              {renderField("Height (cm)", height, setHeight, "number")}
+              {renderField("Weight (kg)", weight, setWeight, "number")}
+              {renderField("Hair Color", hairColor, setHairColor)}
+              {renderField("Hair Length", hairLength, setHairLength)}
+              {renderField("Bust Size", bustSize, setBustSize)}
+              {renderField("Body Type", bodyType, setBodyType)}
+            </div>
+          )}
+        </div>
+
+        {/* Languages and Smoking Section */}
+        <div>
+          <h3
+            className="text-xl font-semibold mb-2 cursor-pointer"
+            onClick={() => toggleSection("languagesAndSmoking")}
+          >
+            Languages and Smoking{" "}
+            {openSections.languagesAndSmoking ? "▼" : "▶"}
+          </h3>
+          {openSections.languagesAndSmoking && (
+            <div className="space-y-4">
+              <LanguagesAndSmoking
+                languages={languages}
+                smoker={smoker}
+                updateLanguage={updateLanguage}
+                removeLanguage={removeLanguage}
+                addLanguage={addLanguage}
+                setSmoker={setSmoker}
+              />
+            </div>
+          )}
+        </div>
+
         {/* Preferences Section */}
         <div>
           <h3
@@ -470,77 +537,8 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
                 setTouchPreference={setTouchPreference}
                 roleplayPreference={roleplayPreference}
                 setRoleplayPreference={setRoleplayPreference}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Special Event Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("specialEvent")}
-          >
-            Special Event {openSections.specialEvent ? "▼" : "▶"}
-          </h3>
-          {openSections.specialEvent && (
-            <div className="space-y-4">
-              <div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={specialEvent}
-                    onChange={e => setSpecialEvent(e.target.checked)}
-                    className="rounded border-gray-700 text-accent-gold focus:ring-accent-gold h-4 w-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-300">
-                    Special Event
-                  </span>
-                </label>
-              </div>
-              {specialEvent && (
-                <div>
-                  <label
-                    htmlFor="eventDescription"
-                    className="block text-sm font-medium text-gray-300"
-                  >
-                    Event Description
-                  </label>
-                  <textarea
-                    id="eventDescription"
-                    value={eventDescription}
-                    onChange={e => setEventDescription(e.target.value)}
-                    rows={4}
-                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* About Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("about")}
-          >
-            About Me* {openSections.about ? "▼" : "▶"}
-          </h3>
-          {openSections.about && (
-            <div>
-              <label
-                htmlFor="about"
-                className="block text-sm font-medium text-gray-300"
-              >
-                About Me
-              </label>
-              <textarea
-                id="about"
-                value={about}
-                onChange={e => setAbout(e.target.value)}
-                rows={4}
-                className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
+                isPreferencesActive={isPreferencesActive}
+                setIsPreferencesActive={setIsPreferencesActive}
               />
             </div>
           )}

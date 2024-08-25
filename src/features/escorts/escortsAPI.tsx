@@ -1,34 +1,136 @@
-import { getDocuments } from '../../utils/firebase';
-import type { Escort } from '../../types';
+import { getDocuments, getDocument } from "../../utils/firebase"
+import type { Escort } from "../../types"
 
 // Mock data
 const mockEscorts: Escort[] = [
   {
     id: "escort-001",
-    userId: '1',
+    userId: "1",
+    greeting: "Hey",
     name: "Sophia",
     age: 28,
-    about: "Sophia is a charismatic and elegant companion, perfect for any occasion.",
+    aboutMe:
+      "Sophia is a charismatic and elegant companion, perfect for any occasion.",
+    timeTable: [{ day: "Monday", from: "7AM", untill: "7PM" }],
+    availability: "MON 7AM to 7PM\nTUE 7AM to 7PM",
     suburb: "Bondi Beach",
-    region: "Sydney",
-    services: ["GFE", "Dinner Dates", "Overnights"],
-    hourlyRate: 500,
-    profilePhotos: [
-      "https://example.com/photos/sophia1.jpg",
-      "https://example.com/photos/sophia2.jpg",
-      "https://example.com/photos/sophia3.jpg"
+    location: "Sydney",
+    baseServices: [
+      "GFE",
+      "Dinner Dates",
+      "Overnights",
+      "Travel",
+      "PSE",
+      "CIM",
+      "COB",
+      "COF",
+      "DFK",
+      "DT",
+      "BBBJ",
+      "MSOG",
+      "Multiple Positions",
+      "Mutual Oral",
+      "Mutual Masturbation",
+      "Sexy Lingerie",
+      "Striptease",
+      "Foot Fetish",
+      "Light Bondage",
+      "Role Play",
+      "Spanking",
+      "Golden Showers",
     ],
-    photos: [
-      "https://example.com/photos/sophia1.jpg",
-      "https://example.com/photos/sophia2.jpg",
-      "https://example.com/photos/sophia3.jpg",
-      "https://example.com/photos/sophia4.jpg"
+    extraServices: [
+      "Couples",
+      "Travel Companion",
+      "Role Play",
+      "Fetish",
+      "Duo",
+      "Bi Double",
+      "Swingers",
+      "Party Bookings",
+      "BDSM",
+      "PSE",
+      "GFE",
+      "Dinner Dates",
+      "Overnights",
+      "Travel",
+      "CIM",
+      "COB",
+      "COF",
+      "DFK",
+      "DT",
+      "BBBJ",
+      "MSOG",
+      "Multiple Positions",
+      "Mutual Oral",
+      "Mutual Masturbation",
+      "Sexy Lingerie",
+      "Striptease",
+      "Foot Fetish",
+      "Light Bondage",
+      "Role Play",
+      "Spanking",
+      "Golden Showers",
+    ],
+    profilePhotos: [
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+    ],
+    detailPhotos: [
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
+    ],
+    selfiePhotos: [
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
+      "https://media.istockphoto.com/id/1384332905/photo/beautiful-woman.jpg?s=1024x1024&w=is&k=20&c=aLHzETGK25Y5P-4HnH08Ur1j4qGGTnmVCLDU4swyNJc=",
     ],
     videos: [
       "https://example.com/videos/sophia1.mp4",
-      "https://example.com/videos/sophia2.mp4"
+      "https://example.com/videos/sophia2.mp4",
+      "https://example.com/videos/sophia2.mp4",
+      "https://example.com/videos/sophia2.mp4",
     ],
-    nationality: "Australian",
+    contacts: [
+      {
+        name: "SMS",
+        detail: "012321029",
+      },
+      {
+        name: "Email",
+        detail: "test@gmail.com",
+      },
+      {
+        name: "WhatsApp",
+        detail: "012321029",
+      },
+      {
+        name: "Telegram",
+        detail: "012321029",
+      },
+      {
+        name: "Instagram",
+        detail: "012321029",
+      },
+      {
+        name: "WeChat",
+        detail: "012321029",
+      },
+      {
+        name: "WEB",
+        detail: "www.example.com",
+      },
+    ],
+    ethnicity: "Australian",
     height: 170,
     weight: 55,
     hairColor: "Blonde",
@@ -38,24 +140,39 @@ const mockEscorts: Escort[] = [
     smoker: false,
     languages: [
       { name: "English", level: "Fluent" },
-      { name: "French", level: "Basic" }
+      { name: "French", level: "Basic" },
     ],
-    priceTable: [
-      { duration: 60, incall: 500, outcall: 550, description: "1 Hour Service" },
-      { duration: 120, incall: 900, outcall: 950, description: "2 Hour Service" }
+    ratesTable: [
+      {
+        duration: 60,
+        incall: 500,
+        outcall: 550,
+        description: "1 Hour Service",
+      },
+      {
+        duration: 120,
+        incall: 900,
+        outcall: 950,
+        description: "2 Hour Service",
+      },
     ],
+    ratesDescription: "Rates are non-negotiable.",
     paymentPlan: {
       tier: "Premium",
       duration: "3 months",
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0]
+      startDate: new Date("2024-08-20T18:00:00Z"),
+      endDate: new Date(
+        new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
+      ),
     },
-    verificationStatus: 'verified',
+    verificationStatus: "verified",
     verifiedDate: Date.now(),
     isProfileActive: true,
     isReviewActive: true,
+    isPreferencesActive: true,
 
     // New properties
+    isSpecialEventActive: true,
     eventDescription: "An elegant evening at the opera",
     occupation: "Model",
     escortType: "Luxury",
@@ -64,31 +181,44 @@ const mockEscorts: Escort[] = [
     oralPreference: "Receive",
     experiencePace: "Slow and Sensual",
     touchPreference: "Soft",
-    roleplayPreference: "Boss and Secretary"
+    roleplayPreference: "Boss and Secretary",
+    lastUpdate: new Date("2024-08-20T18:00:00Z"),
+    LastLogin: new Date("2024-08-20T18:00:00Z"),
+    createdAt: new Date("2024-08-20T18:00:00Z"),
+    latitude: -33.8568,
+    longitude: 151.2153,
   },
   {
     id: "escort-002",
-    userId: '2',
+    userId: "2",
     name: "Mia",
     age: 25,
-    about: "Mia brings youthful energy and sophistication to every engagement.",
+    aboutMe:
+      "Mia brings youthful energy and sophistication to every engagement.",
+    timeTable: [{ day: "Monday", from: "7AM", untill: "7PM" }],
+
+    availability: "MON 7AM to 7PM\nTUE 7AM to 7PM",
+
     suburb: "Melbourne CBD",
-    region: "Melbourne",
-    services: ["Massage", "Couples"],
-    hourlyRate: 450,
+    location: "Melbourne",
+    baseServices: ["Massage", "Couples"],
     profilePhotos: [
       "https://example.com/photos/mia1.jpg",
-      "https://example.com/photos/mia2.jpg"
+      "https://example.com/photos/mia2.jpg",
     ],
-    photos: [
+    detailPhotos: [
       "https://example.com/photos/mia1.jpg",
       "https://example.com/photos/mia2.jpg",
-      "https://example.com/photos/mia3.jpg"
+      "https://example.com/photos/mia3.jpg",
     ],
-    videos: [
-      "https://example.com/videos/mia1.mp4"
+    contacts: [
+      {
+        name: "SMS",
+        detail: "012321029",
+      },
     ],
-    nationality: "British",
+    videos: ["https://example.com/videos/mia1.mp4"],
+    ethnicity: "British",
     height: 165,
     weight: 52,
     hairColor: "Brunette",
@@ -98,22 +228,35 @@ const mockEscorts: Escort[] = [
     smoker: false,
     languages: [
       { name: "English", level: "Fluent" },
-      { name: "Spanish", level: "Conversational" }
+      { name: "Spanish", level: "Conversational" },
     ],
-    priceTable: [
-      { duration: 60, incall: 450, outcall: 500, description: "1 Hour Service" },
-      { duration: 180, incall: 1200, outcall: 1250, description: "3 Hour Service" }
+    ratesTable: [
+      {
+        duration: 60,
+        incall: 450,
+        outcall: 500,
+        description: "1 Hour Service",
+      },
+      {
+        duration: 180,
+        incall: 1200,
+        outcall: 1250,
+        description: "3 Hour Service",
+      },
     ],
     paymentPlan: {
       tier: "Standard",
       duration: "1 month",
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0]
+      startDate: new Date("2024-08-20T18:00:00Z"),
+      endDate: new Date(
+        new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
+      ),
     },
-    verificationStatus: 'pending',
+    verificationStatus: "pending",
     verifiedDate: Date.now(),
     isProfileActive: true,
     isReviewActive: false,
+    isPreferencesActive: true,
 
     // New properties
     eventDescription: "A romantic dinner in the city",
@@ -124,35 +267,50 @@ const mockEscorts: Escort[] = [
     oralPreference: "Give",
     experiencePace: "Passionate",
     touchPreference: "Firm",
-    roleplayPreference: "Teacher and Student"
+    roleplayPreference: "Teacher and Student",
+    lastUpdate: new Date("2024-08-20T18:00:00Z"),
+    LastLogin: new Date("2024-08-20T18:00:00Z"),
+    createdAt: new Date("2024-08-20T18:00:00Z"),
+    latitude: -33.8568,
+    longitude: 151.2153,
   },
   {
     id: "escort-003",
-    userId: '3',
+    userId: "3",
     name: "Emily",
     age: 30,
-    about: "Emily is an experienced and charming companion, always ready to impress.",
+    aboutMe:
+      "Emily is an experienced and charming companion, always ready to impress.",
+    timeTable: [{ day: "Monday", from: "7AM", untill: "7PM" }],
+
+    availability: "MON 7AM to 7PM\nTUE 7AM to 7PM",
+
     suburb: "Surfers Paradise",
-    region: "Gold Coast",
-    services: ["GFE", "Fetishes"],
-    hourlyRate: 600,
+    location: "Gold Coast",
+    baseServices: ["GFE", "Fetishes"],
     profilePhotos: [
       "https://example.com/photos/emily1.jpg",
       "https://example.com/photos/emily2.jpg",
-      "https://example.com/photos/emily3.jpg"
+      "https://example.com/photos/emily3.jpg",
     ],
-    photos: [
+    detailPhotos: [
       "https://example.com/photos/emily1.jpg",
       "https://example.com/photos/emily2.jpg",
       "https://example.com/photos/emily3.jpg",
       "https://example.com/photos/emily4.jpg",
-      "https://example.com/photos/emily5.jpg"
+      "https://example.com/photos/emily5.jpg",
     ],
     videos: [
       "https://example.com/videos/emily1.mp4",
-      "https://example.com/videos/emily2.mp4"
+      "https://example.com/videos/emily2.mp4",
     ],
-    nationality: "American",
+    contacts: [
+      {
+        name: "SMS",
+        detail: "012321029",
+      },
+    ],
+    ethnicity: "American",
     height: 168,
     weight: 57,
     hairColor: "Black",
@@ -162,19 +320,31 @@ const mockEscorts: Escort[] = [
     smoker: true,
     languages: [
       { name: "English", level: "Fluent" },
-      { name: "Italian", level: "Basic" }
+      { name: "Italian", level: "Basic" },
     ],
-    priceTable: [
-      { duration: 60, incall: 600, outcall: 650, description: "1 Hour Service" },
-      { duration: 240, incall: 2000, outcall: 2100, description: "4 Hour Service" }
+    ratesTable: [
+      {
+        duration: 60,
+        incall: 600,
+        outcall: 650,
+        description: "1 Hour Service",
+      },
+      {
+        duration: 240,
+        incall: 2000,
+        outcall: 2100,
+        description: "4 Hour Service",
+      },
     ],
     paymentPlan: {
       tier: "Diamond",
       duration: "6 months",
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0]
+      startDate: new Date("2024-08-20T18:00:00Z"),
+      endDate: new Date(
+        new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
+      ),
     },
-    verificationStatus: 'verified',
+    verificationStatus: "verified",
     verifiedDate: Date.now(),
     isProfileActive: true,
     isReviewActive: true,
@@ -188,20 +358,41 @@ const mockEscorts: Escort[] = [
     oralPreference: "Receive",
     experiencePace: "Fast",
     touchPreference: "Soft and Gentle",
-    roleplayPreference: "Doctor and Patient"
+    roleplayPreference: "Doctor and Patient",
+    lastUpdate: new Date("2024-08-20T18:00:00Z"),
+    LastLogin: new Date("2024-08-20T18:00:00Z"),
+    createdAt: new Date("2024-08-20T18:00:00Z"),
+    latitude: -33.8568,
+    longitude: 151.2153,
   },
   // Add more mock data as needed
-];
+]
 
-
-
-export const fetchEscorts = async (useMockData: boolean = false): Promise<Escort[]> => {
+export const fetchEscorts = async (
+  useMockData: boolean = false,
+): Promise<Escort[]> => {
   if (useMockData) {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockEscorts;
+    await new Promise(resolve => setTimeout(resolve, 500))
+    return mockEscorts
   } else {
     // Fetch real data from Firebase
-    return await getDocuments('escorts') as Escort[];
+    return (await getDocuments("escorts")) as Escort[]
   }
-};
+}
+
+export const fetchEscortById = async (
+  id: string,
+  useMockData: boolean = false,
+): Promise<Escort | null> => {
+  console.log("JUN", id, useMockData)
+
+  if (useMockData) {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500))
+    return mockEscorts.find(escort => escort.id === id) || null
+  } else {
+    const escort = (await getDocument("escort", id)) as Escort
+    return escort
+  }
+}

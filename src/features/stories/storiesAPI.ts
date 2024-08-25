@@ -7,14 +7,19 @@ const mockStories: Story[] = [
     id: "1",
     userId: "1",
     imageUrls: [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
+      "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
     ],
     description: "A lovely day at the beach",
-    createdAt: Date.now() - 86400000, // 1 day ago
-    expiresAt: Date.now() + 86400000,
+    createdAt: new Date("2024-08-20T18:00:00Z"),
+    expiresAt: new Date(
+      new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
+    ),
     suburb: "Foresthill",
-    region: "Auckland",
+    location: "Auckland",
+    latitude: -33.8568,
+    longitude: 151.2153,
     views: 120,
   },
   {
@@ -22,10 +27,14 @@ const mockStories: Story[] = [
     userId: "2",
     imageUrls: ["https://example.com/image3.jpg"],
     description: "Enjoying a night out",
-    createdAt: Date.now() - 172800000, // 2 days ago
-    expiresAt: Date.now() + 86400000,
+    createdAt: new Date("2024-08-20T18:00:00Z"),
+    expiresAt: new Date(
+      new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
+    ),
     suburb: "Foresthill",
-    region: "Auckland",
+    location: "Auckland",
+    latitude: -33.8568,
+    longitude: 151.2153,
     views: 110,
   },
   // Add more mock stories as needed

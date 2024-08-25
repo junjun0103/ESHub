@@ -18,7 +18,8 @@ export function checkMandatoryFields(
       isComplete:
         !!profile.greeting &&
         !!profile.occupation &&
-        (profile.about?.length || 0) >= 1,
+        (profile.aboutMe?.length || 0) >= 1 &&
+        (profile.contacts?.length || 0) >= 1,
       isMandatory: true,
     },
     {
