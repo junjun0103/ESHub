@@ -13,7 +13,6 @@ import { setStories } from "../features/stories/storiesSlice"
 import { fetchEscorts } from "../features/escorts/escortsAPI"
 import { fetchStories } from "../features/stories/storiesAPI"
 import NavFilterSection from "../components/home/NavFilterSection"
-import EnhancedStoriesComponent from "../components/escortDetail/EnhancedStoriesComponent"
 
 const Home: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -46,9 +45,7 @@ const Home: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        <section className="mb-8 mt-11">
-          <EnhancedStoriesComponent stories={stories} />
-        </section>
+        <section className="mb-8 mt-11"></section>
         <section className="mb-8 mt-11">
           <PremiumSection escorts={escorts} />
         </section>

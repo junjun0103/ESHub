@@ -1,13 +1,8 @@
-/* Add any global styles here */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer components {
-  .nav-link {
-    @apply text-white hover:text-accent-gold transition-colors duration-200;
-  }
-}
 
 :root {
   --font-size-sm: clamp(0.8rem, 0.17vw + 0.76rem, 0.89rem);
@@ -19,26 +14,144 @@
   --font-size-xxxl: clamp(3.05rem, 3.54vw + 2.17rem, 5rem);
 }
 
-body {
-  font-size: var(--font-size-base);
+@layer base {
+  html {
+    font-family: "Raleway", sans-serif;
+  }
+
+  body {
+    @apply bg-secondary text-primary;
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Playfair Display", serif;
+  }
+
+  h1 {
+    font-size: var(--font-size-xxxl);
+  }
+
+  h2 {
+    font-size: var(--font-size-xxl);
+  }
+
+  h3 {
+    font-size: var(--font-size-xl);
+  }
+
+  h4 {
+    font-size: var(--font-size-lg);
+  }
+
+  a {
+    @apply text-primary hover:text-accent transition-colors;
+  }
 }
 
-h1 {
-  font-size: var(--font-size-xxl);
+@layer components {
+  .btn {
+    @apply px-6 py-3 text-sm uppercase tracking-wider transition-all duration-300 ease-in-out;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-secondary hover:bg-accent;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-primary hover:bg-gray-100;
+  }
 }
 
-h2 {
-  font-size: var(--font-size-xl);
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }
 
-h3 {
-  font-size: var(--font-size-lg);
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.text-small {
-  font-size: var(--font-size-sm);
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.text-large {
-  font-size: var(--font-size-lg);
+::-webkit-scrollbar-track {
+  background: theme("colors.secondary");
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: theme("colors.primary");
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: theme("colors.accent");
+}
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animation for page transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-transition {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Vogue-inspired typography classes */
+.vogue-heading {
+  @apply font-serif font-bold tracking-tight;
+}
+
+.vogue-subheading {
+  @apply font-sans font-light uppercase tracking-widest;
+}
+
+.vogue-body {
+  @apply font-sans leading-relaxed;
+}
+
+/* Vogue-inspired layout classes */
+.vogue-container {
+  @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.vogue-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-8;
+}
+
+/* Vogue-inspired component classes */
+.vogue-card {
+  @apply bg-secondary shadow-md overflow-hidden transition-all duration-300 ease-in-out;
+}
+
+.vogue-card:hover {
+  @apply shadow-lg;
+}
+
+.vogue-input {
+  @apply bg-transparent border-b border-primary focus:border-accent outline-none transition-colors duration-300;
+}
+
+.vogue-button {
+  @apply bg-primary text-secondary px-6 py-3 text-sm uppercase tracking-wider hover:bg-accent transition-all duration-300;
 }
