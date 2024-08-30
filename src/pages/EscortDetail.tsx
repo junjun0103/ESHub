@@ -1,5 +1,5 @@
 import type React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { useAppSelector, useAppDispatch } from "../app/hooks"
@@ -7,38 +7,39 @@ import { selectUser } from "../features/user/userSlice"
 import { fetchEscortById } from "../features/escorts/escortsAPI"
 import type { Escort, Story } from "../types"
 import Layout from "../components/common/Layout"
-import ReportModal from "./components/ReportModal"
-
-import FullScreenModal from "./components/FullScreenModal"
-import PhotoGallery from "./components/PhotoGallery"
-import InfoCard from "./components/InforCard"
-import EnhancedStoriesComponent from "./components/EnhancedStoriesComponent"
-import DynamicBackground from "./components/DynamicBackground"
-
-import Profile from "./components/Profile"
-import MyVideos from "./components/MyVideos"
-import CollapsibleSection from "./components/CollapsibleSection"
-import AboutMe from "./components/AboutMe"
-import Services from "./components/Services"
-import AvailabilitySection from "./components/AvailabilitySection"
-import RateAndSpecialEventSection from "./components/RatesAndSpecialEventSection"
-import ContactSection from "./components/ContactSection"
-import QuestionAnswerSection from "./components/QuestionAnswerSection"
-import ReviewsSection from "./components/ReviewsSection"
-// import MyVideos from './components/MyVideos';
+import ReportModal from "../components/escortDetail/ReportModal"
+import FullScreenModal from "../components/escortDetail/FullScreenModal"
+import EnhancedStoriesComponent from "../components/escortDetail/EnhancedStoriesComponent"
+import DynamicBackground from "../components/escortDetail/DynamicBackground"
+import Profile from "../components/escortDetail/Profile"
+import MyVideos from "../components/escortDetail/MyVideos"
+import CollapsibleSection from "../components/escortDetail/CollapsibleSection"
+import AboutMe from "../components/escortDetail/AboutMe"
+import Services from "../components/escortDetail/Services"
+import AvailabilitySection from "../components/escortDetail/AvailabilitySection"
+import RateAndSpecialEventSection from "../components/escortDetail/RatesAndSpecialEventSection"
+import ContactSection from "../components/escortDetail/ContactSection"
+import QuestionAnswerSection from "../components/escortDetail/QuestionAnswerSection"
+import ReviewsSection from "../components/escortDetail/ReviewsSection"
+import HeroSection from "../components/escortDetail/HeroSection"
+import BookNow from "../components/escortDetail/BookNow"
 
 const EscortDetail: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isReportOpen, setIsReportOpen] = useState(false)
+
   const [selectedPhoto, setSelectedPhoto] = useState("")
   const { id } = useParams<{ id: string }>()
   const [escort, setEscort] = useState<Escort | null>(null)
 
   const profileRef = useRef<HTMLDivElement>(null)
+  const videosRef = useRef<HTMLDivElement>(null)
   const aboutMeRef = useRef<HTMLDivElement>(null)
   const servicesRef = useRef<HTMLDivElement>(null)
+  const availabilityRef = useRef<HTMLDivElement>(null)
   const ratesRef = useRef<HTMLDivElement>(null)
   const contactsRef = useRef<HTMLDivElement>(null)
-  const availabilityRef = useRef<HTMLDivElement>(null)
+  const QARef = useRef<HTMLDivElement>(null)
 
   const openModal = (photo: string) => {
     setSelectedPhoto(photo)
@@ -49,12 +50,38 @@ const EscortDetail: React.FC = () => {
     setIsModalOpen(false)
   }
 
+  const closeReport = () => {
+    setIsReportOpen(false)
+  }
+
+  const handleReport = (reason: string, comment: string) => {
+    console.log("Report submitted:", reason, comment)
+    setIsReportOpen(false)
+  }
+
   const handleFavoriteToggle = (isFavorite: boolean) => {
     console.log(`Escort ${isFavorite ? "added to" : "removed from"} favorites`)
   }
 
+  // const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+  //   ref.current?.scrollIntoView({ behavior: "smooth" })
+  // }
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: "smooth" })
+
+    // Add a slight delay to ensure the initial scroll is complete
+    setTimeout(() => {
+      const navHeight = 80 // Approximate height of your nav bar, adjust as needed
+      const offset = 20 // Additional offset for extra space
+      const elementPosition = ref.current?.getBoundingClientRect().top
+      const offsetPosition =
+        elementPosition! + window.pageYOffset - navHeight - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      })
+    }, 100)
   }
 
   useEffect(() => {
@@ -119,7 +146,7 @@ const EscortDetail: React.FC = () => {
 
   return (
     <Layout>
-      <DynamicBackground photos={escort.profilePhotos} />
+      <DynamicBackground />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -127,24 +154,20 @@ const EscortDetail: React.FC = () => {
         className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-white"
       >
         {/* Hero Section */}
-        <section className="mb-12 flex flex-col md:flex-row gap-8">
-          <div className="md:w-2/3">
-            <PhotoGallery photos={escort.detailPhotos} name={escort.name} />
-          </div>
-          <div className="md:w-1/3">
-            <InfoCard escort={escort} />
-          </div>
-        </section>
+        <HeroSection escort={escort} />
 
         {/* Quick Navigation */}
         <nav className="sticky top-4 z-20 bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg mb-8">
           <ul className="flex justify-around">
             {[
               { name: "Profile", ref: profileRef },
+              { name: "Vedios", ref: videosRef },
               { name: "AboutMe", ref: aboutMeRef },
               { name: "Services", ref: servicesRef },
+              { name: "Availbility", ref: availabilityRef },
               { name: "Rates", ref: ratesRef },
               { name: "Contacts", ref: contactsRef },
+              { name: "Q&A", ref: QARef },
             ].map(item => (
               <li key={item.name}>
                 <motion.button
@@ -180,14 +203,11 @@ const EscortDetail: React.FC = () => {
           </CollapsibleSection>
           {/* Video */}
           {escort.videos && (
-            <CollapsibleSection
-              ref={profileRef}
-              title="My Videos"
-              initiallyOpen
-            >
+            <CollapsibleSection ref={videosRef} title="My Videos" initiallyOpen>
               <MyVideos videos={escort.videos} />{" "}
             </CollapsibleSection>
           )}
+          <BookNow escort={escort} />
           {/* AboutMe */}
           <CollapsibleSection ref={aboutMeRef} title="About Me" initiallyOpen>
             <AboutMe escort={escort} />
@@ -212,43 +232,32 @@ const EscortDetail: React.FC = () => {
             <ContactSection escort={escort} />
           </CollapsibleSection>
           {/* Q&A */}
-          <CollapsibleSection ref={contactsRef} title="Q&A" initiallyOpen>
+          <CollapsibleSection ref={QARef} title="Q&A" initiallyOpen>
             <QuestionAnswerSection escort={escort} />
           </CollapsibleSection>{" "}
           {/* Reviews */}
-          <CollapsibleSection ref={contactsRef} title="Reviews" initiallyOpen>
+          <CollapsibleSection title="Reviews" initiallyOpen>
             <ReviewsSection escort={escort} />
           </CollapsibleSection>{" "}
           {/* Report */}
         </div>
 
-        {/* Contact and Booking Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-16 text-center"
-        >
-          <h2 className="text-3xl font-serif mb-6 text-accent-gold">
-            Book Now
-          </h2>
-          <div className="flex justify-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-accent-gold text-gray-900 px-8 py-3 rounded-full hover:bg-opacity-80 transition duration-300"
-            >
-              Message
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-transparent text-accent-gold px-8 py-3 rounded-full hover:bg-accent-gold hover:text-gray-900 transition duration-300 border border-accent-gold"
-            >
-              Call
-            </motion.button>
-          </div>
-        </motion.section>
+        <div className="flex justify-center space-x-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-transparent text-accent-gold px-8 py-3 rounded-full hover:bg-accent-gold hover:text-gray-900 transition duration-300 border border-accent-gold"
+            onClick={() => setIsReportOpen(true)}
+          >
+            Report
+          </motion.button>
+        </div>
+
+        <ReportModal
+          isOpen={isReportOpen}
+          onSubmit={handleReport}
+          onClose={closeReport}
+        />
 
         {/* Full Screen Modal */}
         <FullScreenModal isOpen={isModalOpen} onClose={closeModal}>

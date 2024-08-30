@@ -72,13 +72,13 @@ export const updateReviewAnswerAsync = createAsyncThunk(
   "reviews/updateReviewAnswer",
   async ({
     reviewId,
-    updates,
+    answer,
   }: {
     reviewId: string
-    updates: Partial<Review["answer"]>
+    answer: Partial<Review["answer"]>
   }) => {
-    await reviewsAPI.updateReviewAnswer(reviewId, updates, true)
-    return { reviewId, updates }
+    await reviewsAPI.updateReviewAnswer(reviewId, answer, true)
+    return { reviewId, answer }
   },
 )
 
@@ -141,7 +141,7 @@ export const reviewsSlice = createSlice({
         if (index !== -1 && state.reviews[index].answer) {
           state.reviews[index].answer = {
             ...state.reviews[index].answer,
-            ...action.payload.updates,
+            ...action.payload.answer,
           }
         }
       })

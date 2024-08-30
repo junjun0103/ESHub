@@ -7,11 +7,13 @@ import { useAppSelector } from "../../app/hooks"
 import { selectUser } from "../../features/user/userSlice"
 import { updateFavorite, updateLike } from "../../features/user/userAPI"
 
-interface InfoCardProps {
+interface FavLikeShareComponentProps {
   escort: Escort
 }
 
-const InfoCard: React.FC<InfoCardProps> = ({ escort }) => {
+const FavLikeShareComponent: React.FC<FavLikeShareComponentProps> = ({
+  escort,
+}) => {
   const user = useAppSelector(selectUser)
   const [isFavorite, setIsFavorite] = useState(false)
   const [likes, setLikes] = useState(escort?.likes || 0)
@@ -76,37 +78,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ escort }) => {
   }
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-serif mb-4">{escort.greeting},</h2>
-      <h1 className="text-4xl font-serif mb-4 text-accent-gold">
-        <span className="text-2xl text-white">I'm </span> {escort.name}
-      </h1>
-      <p className="text-xl mb-4">
-        <span className="text-xl text-accent-gold">{escort.age}</span> years old
-        •
-        <span className="text-lg ">
-          {" "}
-          {escort.suburb}, {escort.location}
-        </span>
-      </p>
-
-      <table className="w-full mb-6">
-        <thead>
-          <tr>
-            <th className="text-left text-accent-gold">Height</th>
-            <th className="text-left text-accent-gold">Weight</th>
-            <th className="text-left text-accent-gold">Body</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="font-bold">{escort.height} cm</td>
-            <td className="font-bold">{escort.weight} kg</td>
-            <td className="font-bold">{escort.bodyType}</td>
-          </tr>
-        </tbody>
-      </table>
-
+    <div>
       <div className="flex justify-center space-x-6">
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -137,7 +109,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ escort }) => {
       </div>
 
       <div className="text-center mt-2">
-        <span className="text-sm text-gray-400">{likes} likes</span>
+        <span className="text-sm text-gray-200">{likes} likes</span>
       </div>
 
       {showCopiedMessage && (
@@ -154,4 +126,4 @@ const InfoCard: React.FC<InfoCardProps> = ({ escort }) => {
   )
 }
 
-export default InfoCard
+export default FavLikeShareComponent

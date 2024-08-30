@@ -13,7 +13,7 @@ const EnhancedStoriesComponent: React.FC<EnhancedStoriesComponentProps> = ({
   const [selectedStory, setSelectedStory] = useState<Story | null>(null)
 
   return (
-    <div>
+    <div className="mb-8">
       <div className="flex space-x-4 overflow-x-auto pb-4">
         {stories.map((story, index) => (
           <motion.div

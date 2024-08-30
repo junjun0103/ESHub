@@ -11,7 +11,7 @@ import {
 import {
   selectStories,
   selectStoriesStatus,
-  setStory,
+  setStories,
   setStoryStatus,
 } from "../../../features/stories/storiesSlice"
 import { ChevronDownIcon } from "@heroicons/react/24/solid"
@@ -60,7 +60,7 @@ const EscortProfileContent: React.FC = () => {
         try {
           const useMockData = true
           const stories = await fetchStoriesByUserId(user.id, useMockData)
-          dispatch(setStory(stories))
+          dispatch(setStories(stories))
           dispatch(setStoryStatus("idle"))
         } catch (error) {
           console.error("Failed to fetch escort story:", error)

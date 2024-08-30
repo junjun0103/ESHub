@@ -1,27 +1,44 @@
-import type React from 'react';
-import { useAppSelector } from '../../app/hooks';
-import { selectEscorts } from '../../features/escorts/escortsSlice';
+import type React from "react"
+import { Swiper, SwiperSlide } from "swiper/react"
+import "swiper/css"
+import type { Escort } from "../../types"
 
-const PremiumSection: React.FC = () => {
-  const escorts = useAppSelector(selectEscorts);
-  const premiumEscorts = escorts.slice(0, 4); // Just show first 4 as premium for now
+const PremiumSection: React.FC<{ escorts: Escort[] }> = ({ escorts }) => {
+  const premiumEscorts = escorts.slice(0, 8) // Show 8 premium escorts
 
   return (
     <section className="mb-8">
-      <h2 className="text-2xl font-bold mb-4">Premium Escorts</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {premiumEscorts.map((escort) => (
-          <div key={escort.id} className="bg-secondary rounded-lg overflow-hidden shadow-lg">
-            <img src={escort.photos[0]} alt={escort.name} className="w-full h-48 object-cover" />
-            <div className="p-4">
-              <h3 className="font-bold text-lg">{escort.name}</h3>
-              <p>{escort.location}</p>
+      <Swiper
+        spaceBetween={20}
+        slidesPerView={1}
+        breakpoints={{
+          640: { slidesPerView: 2 },
+          768: { slidesPerView: 3 },
+          1024: { slidesPerView: 4 },
+        }}
+      >
+        {premiumEscorts.map(escort => (
+          <SwiperSlide key={escort.id}>
+            <div className="bg-secondary rounded-lg overflow-hidden shadow-lg group">
+              <div className="relative">
+                <img
+                  src={escort.profilePhotos[0]}
+                  alt={escort.name}
+                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <h3 className="font-bold text-lg text-white">
+                    {escort.name}
+                  </h3>
+                  <p className="text-white">{escort.location}</p>
+                </div>
+              </div>
             </div>
-          </div>
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
     </section>
-  );
-};
+  )
+}
 
-export default PremiumSection;
+export default PremiumSection

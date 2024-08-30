@@ -112,3 +112,16 @@ export const deleteStory = async (
     throw new Error("Firebase deleteDocument not implemented")
   }
 }
+
+export const fetchStories = async (
+  useMockData: boolean = false,
+): Promise<Story[]> => {
+  if (useMockData) {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500))
+    return mockStories
+  } else {
+    const stories = (await getDocuments("stories")) as Story[]
+    return stories
+  }
+}

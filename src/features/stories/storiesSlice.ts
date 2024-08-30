@@ -38,7 +38,7 @@ export const storiesSlice = createSlice({
   name: "stories",
   initialState,
   reducers: {
-    setStory: (state, action: PayloadAction<Story[]>) => {
+    setStories: (state, action: PayloadAction<Story[]>) => {
       state.items = action.payload
       state.status = "idle"
       state.error = null
@@ -56,7 +56,8 @@ export const storiesSlice = createSlice({
   },
 })
 
-export const { setStory, setStoryStatus, setStoryError } = storiesSlice.actions
+export const { setStories, setStoryStatus, setStoryError } =
+  storiesSlice.actions
 
 export const selectStories = (state: RootState) => state.stories.items
 export const selectStoriesStatus = (state: RootState) => state.stories.status

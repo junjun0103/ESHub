@@ -20,10 +20,9 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaUser,
-  FaStar,
-  FaRegStar,
 } from "react-icons/fa"
 import OverallRatings from "./OverallRatings"
+import CompactRating from "./CompactRating"
 
 interface ReviewsSectionProps {
   escort: Escort
@@ -53,21 +52,15 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
     dispatch(fetchReviewsAsync(escort.id))
   }, [dispatch, escort.id])
 
-  const canViewPrivate = (review: Review) => {
-    return (
-      user?.userType === "superAdmin" ||
-      user?.id === review.writerUserId ||
-      user?.id === escort.userId
-    )
-  }
+  const canViewPrivate = (review: Review) =>
+    user?.userType === "superAdmin" ||
+    user?.id === review.writerUserId ||
+    user?.id === escort.userId
 
-  const canEdit = (review: Review) => {
-    return user?.userType === "superAdmin" || user?.id === review.writerUserId
-  }
+  const canEdit = (review: Review) =>
+    user?.userType === "superAdmin" || user?.id === review.writerUserId
 
-  const canAnswer = (review: Review) => {
-    return user?.id === escort.userId
-  }
+  const canAnswer = (review: Review) => user?.id === escort.userId
 
   const handleAddReview = (
     newReview: Omit<
@@ -110,16 +103,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
     dispatch(deleteReviewAsync(reviewId))
   }
 
-  const renderStars = (rating: number) => {
-    return [...Array(5)].map((_, index) =>
-      index < rating ? (
-        <FaStar key={index} className="text-yellow-400" />
-      ) : (
-        <FaRegStar key={index} className="text-gray-400" />
-      ),
-    )
-  }
-
   const ReviewItem: React.FC<{
     review: Review
     onEdit: () => void
@@ -127,7 +110,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
   }> = ({ review, onEdit, onDelete }) => {
     const [editedAnswer, setEditedAnswer] = useState(review.answer?.text || "")
     const [isEditedAnswerPrivate, setIsEditedAnswerPrivate] = useState(
-      review.answer?.isPrivate,
+      review.answer?.isPrivate ?? false,
     )
 
     const isExpanded = expandedReviewId === review.id
@@ -139,6 +122,21 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
 
     const averageRating =
       review.rating.reduce((sum, r) => sum + r.rating, 0) / review.rating.length
+
+    const handleEditAnswer = () => {
+      if (review.answer) {
+        dispatch(
+          updateReviewAnswerAsync({
+            reviewId: review.id,
+            answer: {
+              text: editedAnswer,
+              isPrivate: isEditedAnswerPrivate,
+            },
+          }),
+        )
+        setEditingAnswerId(null)
+      }
+    }
 
     return (
       <div className="bg-gray-800 p-4 rounded-lg mb-4">
@@ -155,8 +153,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
                 <FaUser className="mr-1" /> Mine
               </span>
             )}
-            <div className="flex mr-2">
-              {renderStars(Math.round(averageRating))}
+            <div className="mr-2">
+              <CompactRating rating={averageRating} />
             </div>
             {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
           </div>
@@ -171,7 +169,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
               {review.rating.map(r => (
                 <div key={r.id} className="flex items-center mt-2">
                   <span className="w-48 text-sm">{r.name}:</span>
-                  <div className="flex">{renderStars(r.rating)}</div>
+                  <CompactRating rating={r.rating} size="sm" />
                 </div>
               ))}
             </div>
@@ -189,28 +187,65 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ escort }) => {
 
             {review.answer && (
               <div className="mt-4 pl-4 border-l-2 border-accent-gold">
-                <p className="text-white">{review.answer.text}</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Answered by {escort.name} on{" "}
-                  {new Date(review.answer.createdAt).toLocaleDateString()}
-                </p>
-                {canAnswer(review) && (
-                  <div className="mt-2">
-                    <button
-                      onClick={() => setEditingAnswerId(review.id)}
-                      className="text-accent-gold mr-2"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() =>
-                        dispatch(deleteReviewAnswerAsync(review.id))
-                      }
-                      className="text-red-500"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
+                {editingAnswerId === review.id ? (
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault()
+                      handleEditAnswer()
+                    }}
+                  >
+                    <textarea
+                      value={editedAnswer}
+                      onChange={e => setEditedAnswer(e.target.value)}
+                      className="w-full bg-gray-700 text-white p-2 rounded mb-2"
+                      placeholder="Edit your answer here..."
+                    />
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={isEditedAnswerPrivate}
+                          onChange={e =>
+                            setIsEditedAnswerPrivate(e.target.checked)
+                          }
+                          className="mr-2"
+                        />
+                        <span className="text-sm">Private answer</span>
+                      </label>
+                      <button
+                        type="submit"
+                        className="bg-accent-gold text-black px-4 py-2 rounded"
+                      >
+                        Update Answer
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <p className="text-white">{review.answer.text}</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Answered by {escort.name} on{" "}
+                      {new Date(review.answer.createdAt).toLocaleDateString()}
+                    </p>
+                    {canAnswer(review) && (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => setEditingAnswerId(review.id)}
+                          className="text-accent-gold mr-2"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() =>
+                            dispatch(deleteReviewAnswerAsync(review.id))
+                          }
+                          className="text-red-500"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
