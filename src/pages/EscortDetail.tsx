@@ -1,12 +1,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { motion } from "framer-motion"
-import { Swiper, SwiperSlide } from "swiper/react"
-import { Navigation, Pagination } from "swiper/modules"
-import "swiper/css"
-import "swiper/css/navigation"
-import "swiper/css/pagination"
 import { useAppSelector, useAppDispatch } from "../app/hooks"
 import { fetchEscortById } from "../features/escorts/escortsAPI"
 import { selectUser } from "../features/user/userSlice"
@@ -15,6 +9,17 @@ import Layout from "../components/common/Layout"
 import IntroductionSection from "../components/escortDetail/IntroductionSection"
 import StoriesSection from "../components/escortDetail/StoriesSection"
 import ProfileGallerySection from "../components/escortDetail/ProfileGallerySection"
+import ServiceSection from "../components/escortDetail/ServiceSection"
+import RateSection from "../components/escortDetail/RateSection"
+import ContactInfoSection from "../components/escortDetail/ContactInfoSection"
+import DetailInfoSection from "../components/escortDetail/DetailInfoSection"
+import DetailPhotoGallerySection from "../components/escortDetail/DetailPhotoGallerySection"
+import QnASection from "../components/escortDetail/QnASection"
+import SpecialEventSection from "../components/escortDetail/SpecialEventSection"
+import AboutMeSection from "../components/escortDetail/AboutMeSection"
+import ReviewSection from "../components/escortDetail/ReviewSection"
+import MyVideosSection from "../components/escortDetail/MyVideosSection"
+import PreferenceSection from "../components/escortDetail/PreferenceSection"
 
 const EscortDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -72,94 +77,29 @@ const EscortDetail: React.FC = () => {
         <div className="vogue-container py-16">
           <StoriesSection stories={stories} />
           {/* About Me */}
-          <section id="about" className="mb-20">
-            <h2 className="vogue-heading text-4xl mb-8">About Me</h2>
-            <p className="vogue-body text-lg">{escort.aboutMe}</p>
-          </section>
+          <AboutMeSection escort={escort} />
           {/* Gallery */}
           <ProfileGallerySection escort={escort} />
+          {/* Detailed Information */}
+          <DetailInfoSection escort={escort} />
           {/* Services */}
-          <section id="services" className="mb-20">
-            <h2 className="vogue-heading text-4xl mb-8">Services</h2>
-            <div className="vogue-grid">
-              <div>
-                <h3 className="vogue-subheading text-2xl mb-4">
-                  Base Services
-                </h3>
-                <ul className="vogue-body list-disc list-inside">
-                  {escort.baseServices.map((service, index) => (
-                    <li key={index} className="mb-2">
-                      {service}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {escort.extraServices && (
-                <div>
-                  <h3 className="vogue-subheading text-2xl mb-4">
-                    Extra Services
-                  </h3>
-                  <ul className="vogue-body list-disc list-inside">
-                    {escort.extraServices.map((service, index) => (
-                      <li key={index} className="mb-2">
-                        {service}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </section>
+          <ServiceSection escort={escort} />
           {/* Rates */}
-          <section id="rates" className="mb-20">
-            <h2 className="vogue-heading text-4xl mb-8">Rates</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b">
-                    <th className="vogue-subheading pb-4 text-lg">Duration</th>
-                    <th className="vogue-subheading pb-4 text-lg">Incall</th>
-                    <th className="vogue-subheading pb-4 text-lg">Outcall</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {escort.ratesTable?.map((rate, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="vogue-body py-4">{rate.duration} min</td>
-                      <td className="vogue-body py-4">${rate.incall}</td>
-                      <td className="vogue-body py-4">${rate.outcall}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <RateSection escort={escort} />
           {/* Contact Info */}
-          <section className="mb-20">
-            <h2 className="text-4xl font-serif font-bold mb-8">Contact</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {escort.contacts.map((contact, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center border-b py-4"
-                >
-                  <span className="font-bold">{contact.name}:</span>
-                  <span>{contact.detail}</span>
-                </div>
-              ))}
-            </div>
-          </section>
+          <ContactInfoSection escort={escort} />
           {/* Special Event */}
-          {escort.isSpecialEventActive && (
-            <section className="mb-20">
-              <h2 className="text-4xl font-serif font-bold mb-8">
-                Special Event
-              </h2>
-              <p className="text-lg leading-relaxed">
-                {escort.eventDescription}
-              </p>
-            </section>
-          )}{" "}
+          <SpecialEventSection escort={escort} />
+          {/* Detail Photo Gallery */}
+          <DetailPhotoGallerySection escort={escort} />
+          {/* My Videos section */}
+          <MyVideosSection videos={escort.videos || []} />
+          {/* Preference Section */}
+          <PreferenceSection escort={escort} />
+          {/* Q&A Section */}
+          <QnASection escortId={escort.id} escortUserId={escort.userId} />
+          {/* Review Section */}
+          <ReviewSection escortId={escort.id} escortUserId={escort.userId} />
         </div>
       </div>
     </Layout>

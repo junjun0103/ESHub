@@ -120,10 +120,8 @@ const mockEscorts: Escort[] = escortIds.map(item => ({
     "https://sample-il.com/wp-content/uploads/2023/08/EmptyName-3.jpg",
   ],
   videos: [
-    "https://example.com/videos/sophia1.mp4",
-    "https://example.com/videos/sophia2.mp4",
-    "https://example.com/videos/sophia2.mp4",
-    "https://example.com/videos/sophia2.mp4",
+    "https://www.quintic.com/software/sample_videos/One%20Point%20Export/Cricket%20Bowl.avi",
+    "https://www.quintic.com/software/sample_videos/One%20Point%20Export/Cricket%20Batting%20-%201%20Point.avi",
   ],
   contacts: [
     {

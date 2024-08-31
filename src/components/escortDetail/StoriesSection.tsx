@@ -2,6 +2,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import type { Story } from "../../types"
 import StoryModal from "./StoryModal"
+import { truncateDescription } from "./Helper"
 
 interface StoriesSectionProps {
   stories: Story[]
@@ -34,13 +35,6 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({ stories }) => {
 
   const closeStory = () => {
     setSelectedStoryIndex(null)
-  }
-
-  const truncateDescription = (description: string, maxLength: number) => {
-    if (description.length > maxLength) {
-      return description.slice(0, maxLength) + "..."
-    }
-    return description
   }
 
   return (

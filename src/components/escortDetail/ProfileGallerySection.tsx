@@ -1,63 +1,64 @@
-import React, { useRef, useState } from 'react';
-import Modal from './PhotoModal'; // We will create this component next
-import { Escort } from '../../types';
+import type React from "react"
+import { useRef, useState } from "react"
+import Modal from "./PhotoModal"
+import type { Escort } from "../../types"
 
 interface GalleryProps {
-  escort:Escort
+  escort: Escort
 }
 
 const Gallery: React.FC<GalleryProps> = ({ escort }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === escort.profilePhotos.length - 1 ? 0 : prevIndex + 1
-    );
-  };
+    setCurrentIndex(prevIndex =>
+      prevIndex === escort.profilePhotos.length - 1 ? 0 : prevIndex + 1,
+    )
+  }
 
   const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? escort.profilePhotos.length - 1 : prevIndex - 1
-    );
-  };
+    setCurrentIndex(prevIndex =>
+      prevIndex === 0 ? escort.profilePhotos.length - 1 : prevIndex - 1,
+    )
+  }
 
   const openModal = (index: number) => {
-    setCurrentIndex(index);
-    setIsModalOpen(true);
-  };
+    setCurrentIndex(index)
+    setIsModalOpen(true)
+  }
 
   const closeModal = () => {
-    setIsModalOpen(false);
-  };
+    setIsModalOpen(false)
+  }
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.changedTouches[0].screenX;
-  };
+    touchStartX.current = e.changedTouches[0].screenX
+  }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    touchEndX.current = e.changedTouches[0].screenX;
-    handleSwipe();
-  };
+    touchEndX.current = e.changedTouches[0].screenX
+    handleSwipe()
+  }
 
   const handleSwipe = () => {
     if (touchStartX.current - touchEndX.current > 50) {
       // Swiped left, show next image
-      handleNext();
+      handleNext()
     }
 
     if (touchStartX.current - touchEndX.current < -50) {
       // Swiped right, show previous image
-      handlePrev();
+      handlePrev()
     }
-  };
+  }
 
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
   return (
     <section id="gallery" className="mb-20">
-      <h2 className="vogue-heading text-4xl mb-8">Gallery</h2>
+      {/* <h2 className="vogue-heading text-4xl mb-8">Gallery</h2> */}
       <div className="relative">
         <div className="overflow-hidden aspect-w-16 aspect-h-9">
           <img
@@ -90,7 +91,7 @@ const Gallery: React.FC<GalleryProps> = ({ escort }) => {
             <span
               key={index}
               className={`block w-2 h-2 rounded-full ${
-                index === currentIndex ? 'bg-white' : 'bg-gray-400'
+                index === currentIndex ? "bg-white" : "bg-gray-400"
               }`}
             ></span>
           ))}
@@ -107,7 +108,7 @@ const Gallery: React.FC<GalleryProps> = ({ escort }) => {
         />
       )}
     </section>
-  );
-};
+  )
+}
 
-export default Gallery;
+export default Gallery

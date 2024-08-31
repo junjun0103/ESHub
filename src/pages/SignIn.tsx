@@ -1,75 +1,121 @@
-import type React from 'react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { setUser, setStatus, setError, selectUserStatus, selectUserError } from '../features/user/userSlice';
-import { signIn } from '../utils/firebase';
-import Layout from '../components/common/Layout';
+import type React from "react"
+import { useState } from "react"
+import { Link } from "react-router-dom"
+import { useAppDispatch } from "../app/hooks"
+// import { login, loginWithGoogle } from '../features/auth/authSlice';
+import Layout from "../components/common/Layout"
 
-const SignIn: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const status = useAppSelector(selectUserStatus);
-  const error = useAppSelector(selectUserError);
+const LoginPage: React.FC = () => {
+  const dispatch = useAppDispatch()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(setStatus('loading'));
-    try {
-      const userCredential = await signIn(email, password);
-      dispatch(setUser({
-        id: userCredential.user.uid,
-        email: userCredential.user.email!,
-        name: userCredential.user.displayName || 'User',
-        userType: 'customer', // You might want to fetch this from your database
-      }));
-      navigate('/');
-    } catch (error) {
-      dispatch(setError((error as Error).message));
-    }
-  };
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    // dispatch(login({ email, password }));
+  }
+
+  const handleGoogleLogin = () => {
+    // dispatch(loginWithGoogle());
+  }
 
   return (
     <Layout>
-      <div className="max-w-md mx-auto mt-8">
-        <h1 className="text-3xl font-bold mb-4">Sign In</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
           <div>
-            <label htmlFor="email" className="block mb-1">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded"
-              required
-            />
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Log in to your account
+            </h2>
           </div>
-          <div>
-            <label htmlFor="password" className="block mb-1">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
-              required
-            />
+          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            <div className="rounded-md shadow-sm -space-y-px">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Log in
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gray-50 text-gray-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <button
+                onClick={handleGoogleLogin}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <img
+                  className="h-5 w-5 mr-2"
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google logo"
+                />
+                Log in with Google
+              </button>
+            </div>
           </div>
-          {error && <p className="text-red-500">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-accent-gold text-white p-2 rounded hover:bg-opacity-80"
-            disabled={status === 'loading'}
-          >
-            {status === 'loading' ? 'Signing In...' : 'Sign In'}
-          </button>
-        </form>
+
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </Layout>
-  );
-};
+  )
+}
 
-export default SignIn;
+export default LoginPage

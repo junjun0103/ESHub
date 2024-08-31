@@ -2,6 +2,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion, useScroll, useTransform } from "framer-motion"
+import HeaderEscortDetailNav from "./HeaderEscortDetailNav"
 
 const Header: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(true)
@@ -66,38 +67,7 @@ const Header: React.FC = () => {
             </ul>
           </nav>
         </div>
-        {isEscortDetailPage && isExpanded && (
-          <motion.nav
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="mt-2"
-          >
-            <ul className="flex justify-center space-x-8">
-              <li>
-                <a href="#about" className="hover:text-accent">
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="#gallery" className="hover:text-accent">
-                  Gallery
-                </a>
-              </li>
-              <li>
-                <a href="#services" className="hover:text-accent">
-                  Services
-                </a>
-              </li>
-              <li>
-                <a href="#rates" className="hover:text-accent">
-                  Rates
-                </a>
-              </li>
-            </ul>
-          </motion.nav>
-        )}
+        {isEscortDetailPage && isExpanded && <HeaderEscortDetailNav />}
       </div>
     </motion.header>
   )

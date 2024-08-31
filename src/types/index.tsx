@@ -149,7 +149,6 @@ export interface Review {
 }
 
 export interface ReviewRating {
-  id: string
   name: string
   rating: number
 }
