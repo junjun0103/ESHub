@@ -21,7 +21,7 @@ const DetailInfoSection: React.FC<DetailInfoSectionProps> = ({ escort }) => {
   }
 
   return (
-    <section className="mb-20">
+    <section id="info" className="mb-20">
       <h2 className="vogue-heading text-4xl mb-8">Information</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InfoItem label="Age" value={escort.age} />

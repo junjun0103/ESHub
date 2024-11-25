@@ -7,26 +7,34 @@ export interface ProfileSection {
 }
 
 export function checkMandatoryFields(
-  stories?: Story[],
+  story?: Story | null,
   profile?: Escort | null,
 ): ProfileSection[] {
   if (!profile) return []
+
+  console.log("JUN profile", profile)
+  console.log("JUN story", story)
 
   return [
     {
       name: "Information",
       isComplete:
-        !!profile.greeting &&
-        !!profile.occupation &&
-        (profile.aboutMe?.length || 0) >= 1 &&
-        (profile.contacts?.length || 0) >= 1,
+        !!profile?.greeting &&
+        !!profile?.name &&
+        !!profile?.age &&
+        !!profile?.location &&
+        !!profile?.address?.address &&
+        !!profile?.aboutMe &&
+        !!profile?.occupation &&
+        (profile?.aboutMe?.length || 0) >= 1 &&
+        (profile?.contacts?.length || 0) >= 1,
       isMandatory: true,
     },
     {
       name: "Media",
       isComplete:
         (profile.profilePhotos?.length || 0) >= 1 &&
-        (profile.photos?.length || 0) >= 1,
+        (profile.detailPhotos?.length || 0) >= 1,
       isMandatory: true,
     },
     {
@@ -38,21 +46,21 @@ export function checkMandatoryFields(
     },
     {
       name: "Price Table",
-      isComplete: (profile.priceTable?.length || 0) >= 1,
+      isComplete: (profile.ratesTable?.length || 0) >= 1,
       isMandatory: true,
     },
     {
       name: "Services",
-      isComplete: (profile.services?.length || 0) >= 1,
+      isComplete: (profile.baseServices?.length || 0) >= 1,
       isMandatory: true,
     },
     {
-      name: "Stories",
-      isComplete: (stories?.length || 0) >= 1,
+      name: "Stories (optional)",
+      isComplete: (Object(story?.storyEntries).length || 0) >= 1,
       isMandatory: false,
     },
     {
-      name: "Verification",
+      name: "Verification (optional)",
       isComplete: profile.verificationStatus === "verified",
       isMandatory: false,
     },

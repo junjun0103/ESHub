@@ -1,22 +1,93 @@
 import type React from "react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAppDispatch } from "../app/hooks"
-// import { login, loginWithGoogle } from '../features/auth/authSlice';
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth"
+import { auth, db } from "../firebase/config"
+import { doc, getDoc } from "firebase/firestore"
 import Layout from "../components/common/Layout"
+import ResendVerificationEmail from "./components/ResendVerificationEmail"
+import { setUser, setStatus, setError } from "../features/user/userSlice"
+import type { User } from "../types"
 
 const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showResendVerification, setShowResendVerification] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // dispatch(login({ email, password }));
+    setLoading(true)
+    setErrorMessage(null)
+    setShowResendVerification(false)
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      )
+      const user = userCredential.user
+
+      if (user.emailVerified) {
+        getDoc(doc(db, "users", user.uid)).then(doc => {
+          if (doc.exists()) {
+            const data = doc.data()
+            const userData: User = {
+              id: data.uid,
+              email: data.email ?? "",
+              name: data.name ?? "",
+              userType: data.userType ?? "",
+              ...data,
+            }
+            dispatch(setUser(userData))
+            dispatch(setStatus("idle"))
+            navigate("/")
+          } else {
+            dispatch(setStatus("failed"))
+            dispatch(setError("User not found"))
+          }
+        })
+      } else {
+        // User's email is not verified
+        setErrorMessage("Please verify your email before logging in.")
+        setShowResendVerification(true)
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage("Please check your email and password.")
+      } else {
+        setErrorMessage("An unknown error occurred")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleGoogleLogin = () => {
-    // dispatch(loginWithGoogle());
+  const handleGoogleLogin = async () => {
+    setLoading(true)
+    setErrorMessage(null)
+    setShowResendVerification(false)
+
+    try {
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(auth, provider)
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage("An error occurred. Please try again.")
+      } else {
+        setErrorMessage("An unknown error occurred")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -28,6 +99,17 @@ const LoginPage: React.FC = () => {
               Log in to your account
             </h2>
           </div>
+
+          {errorMessage && (
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
+              <strong className="font-bold">Error:</strong>
+              <span className="block sm:inline"> {errorMessage}</span>
+            </div>
+          )}
+
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
@@ -63,16 +145,28 @@ const LoginPage: React.FC = () => {
                 />
               </div>
             </div>
-
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+            </div>
             <div>
               <button
                 type="submit"
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled={loading}
               >
-                Log in
+                {loading ? "Logging in..." : "Log in"}
               </button>
             </div>
           </form>
+
+          {showResendVerification && <ResendVerificationEmail email={email} />}
 
           <div className="mt-6">
             <div className="relative">
@@ -90,13 +184,14 @@ const LoginPage: React.FC = () => {
               <button
                 onClick={handleGoogleLogin}
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled={loading}
               >
                 <img
                   className="h-5 w-5 mr-2"
                   src="https://www.svgrepo.com/show/475656/google-color.svg"
                   alt="Google logo"
                 />
-                Log in with Google
+                {loading ? "Logging in..." : "Log in with Google"}
               </button>
             </div>
           </div>

@@ -56,7 +56,7 @@ const DetailPhotoGallerySection: React.FC<Props> = ({ escort }) => {
   )
 
   return (
-    <section className="mb-20">
+    <section id="photos" className="mb-20">
       <h2 className="vogue-heading text-4xl mb-8">Photo Gallery</h2>
 
       {/* Mobile view with tabs */}

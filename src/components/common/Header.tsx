@@ -1,14 +1,22 @@
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { motion, useScroll, useTransform } from "framer-motion"
+import { useAppSelector, useAppDispatch } from "../../app/hooks"
+import { selectUser, setUser } from "../../features/user/userSlice"
+import { signOut } from "firebase/auth"
+import { auth } from "../../firebase/config"
 import HeaderEscortDetailNav from "./HeaderEscortDetailNav"
 
 const Header: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { scrollY } = useScroll()
+
+  const user = useAppSelector(selectUser)
 
   const isEscortDetailPage = location.pathname.startsWith("/escort/")
 
@@ -39,6 +47,16 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [lastScrollY])
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      dispatch(setUser(null))
+      navigate("/")
+    } catch (error) {
+      console.error("Error signing out: ", error)
+    }
+  }
+
   return (
     <motion.header
       style={{ height: headerHeight }}
@@ -54,16 +72,36 @@ const Header: React.FC = () => {
           </motion.div>
           <nav>
             <ul className="flex space-x-6">
-              <li>
-                <Link to="/login" className="hover:text-accent">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link to="/signup" className="hover:text-accent">
-                  Sign Up
-                </Link>
-              </li>
+              {user ? (
+                <>
+                  <li>
+                    <Link to="/profile" className="hover:text-accent">
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={handleLogout}
+                      className="hover:text-accent"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/login" className="hover:text-accent">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/signup" className="hover:text-accent">
+                      Sign Up
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </nav>
         </div>

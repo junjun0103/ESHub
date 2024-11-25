@@ -18,8 +18,8 @@ const HeaderEscortDetailNav: React.FC = () => {
             </a>
           </li>
           <li>
-            <a href="#gallery" className="hover:text-accent">
-              Gallery
+            <a href="#info" className="hover:text-accent">
+              Info
             </a>
           </li>
           <li>
@@ -30,6 +30,26 @@ const HeaderEscortDetailNav: React.FC = () => {
           <li>
             <a href="#rates" className="hover:text-accent">
               Rates
+            </a>
+          </li>
+          <li>
+            <a href="#contact" className="hover:text-accent">
+              Contact
+            </a>
+          </li>
+          <li>
+            <a href="#photos" className="hover:text-accent">
+              Photos
+            </a>
+          </li>
+          <li>
+            <a href="#videos" className="hover:text-accent">
+              Videos
+            </a>
+          </li>
+          <li>
+            <a href="#time" className="hover:text-accent">
+              Time
             </a>
           </li>
         </ul>

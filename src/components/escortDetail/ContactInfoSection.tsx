@@ -7,7 +7,7 @@ interface Props {
 
 const ContactInfoSection: React.FC<Props> = ({ escort }) => {
   return (
-    <section className="mb-20">
+    <section id="contact" className="mb-20">
       <h2 className="text-4xl font-serif font-bold mb-8">Contact</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {escort.contacts.map((contact, index) => (

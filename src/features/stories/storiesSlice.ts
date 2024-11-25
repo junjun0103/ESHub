@@ -10,26 +10,7 @@ interface StoriesState {
 }
 
 const initialState: StoriesState = {
-  items: [
-    {
-      id: "1",
-      userId: "user1",
-      imageUrls: [
-        "https://example.com/image1.jpg",
-        "https://example.com/image2.jpg",
-      ],
-      description: "A lovely day at the beach",
-      createdAt: new Date("2024-08-20T18:00:00Z"),
-      expiresAt: new Date(
-        new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
-      ),
-      suburb: "Foresthill",
-      location: "Auckland",
-      latitude: -33.8568,
-      longitude: 151.2153,
-      views: 10,
-    },
-  ],
+  items: [],
   status: "idle",
   error: null,
 }

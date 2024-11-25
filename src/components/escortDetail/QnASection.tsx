@@ -8,10 +8,9 @@ import { formatDate, truncateDescription } from "./Helper"
 
 interface QnASectionProps {
   escortId: string
-  escortUserId: string
 }
 
-const QnASection: React.FC<QnASectionProps> = ({ escortId, escortUserId }) => {
+const QnASection: React.FC<QnASectionProps> = ({ escortId }) => {
   const [qnas, setQnas] = useState<QuestionAnswer[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -84,13 +83,13 @@ const QnASection: React.FC<QnASectionProps> = ({ escortId, escortUserId }) => {
   return (
     <section className="mb-20">
       <h2 className="vogue-heading text-4xl mb-8">Q&A</h2>
-      {user.userType !== "escort" && (
+      {user.userType !== "advertiser" && (
         <QuestionForm onSubmit={handleCreateQuestion} />
       )}
       <QnAList
         qnas={qnas}
         currentUser={user}
-        escortUserId={escortUserId}
+        escortUserId={escortId}
         onUpdateQuestion={handleUpdateQuestion}
         onDeleteQuestion={handleDeleteQuestion}
         onAnswer={handleAnswer}

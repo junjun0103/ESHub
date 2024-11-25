@@ -19,47 +19,53 @@ const PreferenceSection: React.FC<PreferenceSectionProps> = ({ escort }) => {
       <h2 className="vogue-heading text-4xl mb-8">My Preferences</h2>
       <div className="bg-gray-100 p-6 rounded-lg shadow-md">
         <ul className="space-y-4">
-          {escort.favoritePosition && (
+          {escort?.preferences?.favoritePosition && (
             <li className="flex items-center">
               <span className="mr-2 text-2xl">🌟</span>
               <span>
                 My favorite position is{" "}
-                <HighlightedText text={escort.favoritePosition} />.
+                <HighlightedText text={escort?.preferences?.favoritePosition} />
+                .
               </span>
             </li>
           )}
-          {escort.oralPreference && (
+          {escort?.preferences?.oralPreference && (
             <li className="flex items-center">
               <span className="mr-2 text-2xl">👄</span>
               <span>
                 When it comes to oral, I prefer{" "}
-                <HighlightedText text={escort.oralPreference} />.
+                <HighlightedText text={escort?.preferences?.oralPreference} />.
               </span>
             </li>
           )}
-          {escort.experiencePace && (
+          {escort?.preferences?.experiencePace && (
             <li className="flex items-center">
               <span className="mr-2 text-2xl">⏱️</span>
               <span>
                 My ideal pace for an experience is{" "}
-                <HighlightedText text={escort.experiencePace} />.
+                <HighlightedText text={escort?.preferences?.experiencePace} />.
               </span>
             </li>
           )}
-          {escort.touchPreference && (
+          {escort?.preferences?.touchPreference && (
             <li className="flex items-center">
               <span className="mr-2 text-2xl">🤗</span>
               <span>
-                I enjoy <HighlightedText text={escort.touchPreference} /> touch.
+                I enjoy{" "}
+                <HighlightedText text={escort?.preferences?.touchPreference} />{" "}
+                touch.
               </span>
             </li>
           )}
-          {escort.roleplayPreference && (
+          {escort?.preferences?.roleplayPreference && (
             <li className="flex items-center">
               <span className="mr-2 text-2xl">🎭</span>
               <span>
                 When it comes to roleplay, I prefer{" "}
-                <HighlightedText text={escort.roleplayPreference} />.
+                <HighlightedText
+                  text={escort?.preferences?.roleplayPreference}
+                />
+                .
               </span>
             </li>
           )}

@@ -7,7 +7,8 @@ import {
   setEscorts,
   setStatus,
 } from "../features/escorts/escortsSlice"
-import { setStories } from "../features/stories/storiesSlice"
+import { setStories, selectStories } from "../features/stories/storiesSlice"
+import { selectEscorts } from "../features/escorts/escortsSlice"
 import { fetchEscorts } from "../features/escorts/escortsAPI"
 import { fetchStories } from "../features/stories/storiesAPI"
 import StoriesSection from "../components/escortDetail/StoriesSection"
@@ -19,11 +20,14 @@ import Filter from "../components/home/Filter"
 const Home: React.FC = () => {
   const dispatch = useAppDispatch()
   const status = useAppSelector(selectEscortsStatus)
-  const escorts = useAppSelector(state => state.escorts.escorts)
-  const stories = useAppSelector(state => state.stories.items)
+  const escorts = useAppSelector(selectEscorts)
+  const stories = useAppSelector(selectStories)
   const [isFilterExpanded, setIsFilterExpanded] = useState(false)
 
   useEffect(() => {
+    console.log("JUN escort", escorts)
+    console.log("JUN stories", stories)
+
     const getEscorts = async () => {
       dispatch(setStatus("loading"))
       try {

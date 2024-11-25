@@ -2,6 +2,7 @@ import type React from "react"
 import { useState } from "react"
 import type { Escort } from "../../../types"
 import { uploadFile } from "../../../utils/firebase"
+import { CameraIcon, XMarkIcon } from "@heroicons/react/24/outline"
 
 interface MediaSectionProps {
   profile: Escort | null
@@ -10,6 +11,9 @@ interface MediaSectionProps {
 
 const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
   const [uploading, setUploading] = useState(false)
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "detail" | "selfie" | "video"
+  >("profile")
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -77,13 +81,13 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
       case "profile":
         onUpdate({
           profilePhotos:
-            profile?.profilePhotos.filter(photo => photo !== url) || [],
+            profile?.profilePhotos?.filter(photo => photo !== url) || [],
         })
         break
       case "detail":
         onUpdate({
           detailPhotos:
-            profile?.detailPhotos.filter(photo => photo !== url) || [],
+            profile?.detailPhotos?.filter(photo => photo !== url) || [],
         })
         break
       case "selfie":
@@ -101,135 +105,89 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     // You might also want to delete the file from Firebase Storage here
   }
 
-  const renderUploadSection = (
+  const renderUploadButton = (
     type: "profile" | "detail" | "selfie" | "video",
-    maxCount: number,
   ) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-300 mb-2">
-        Upload{" "}
-        {type === "profile"
-          ? "Profile Photos"
-          : type === "detail"
-            ? "Detail Photos"
-            : "Videos"}{" "}
-        (Max {maxCount})
-      </label>
-      <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-accent-gold text-gray-900 rounded-md hover:bg-opacity-80 transition-all duration-300">
-        <svg
-          className="w-5 h-5 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          />
-        </svg>
-        Choose Files
-        <input
-          type="file"
-          onChange={e => handleFileUpload(e, type)}
-          accept={type === "video" ? "video/*" : "image/*"}
-          multiple
-          className="hidden"
-        />
-      </label>
-      <span className="ml-3 text-sm text-gray-400">
-        {type === "profile"
-          ? "(PNG, JPG up to 5MB each)"
-          : type === "detail"
-            ? "(PNG, JPG up to 10MB each)"
-            : "(MP4, MOV up to 50MB each)"}
-      </span>
-    </div>
+    <label className="vogue-button flex items-center justify-center w-full py-3 mb-4">
+      <CameraIcon className="w-5 h-5 mr-2" />
+      {type === "video" ? "Upload Video" : "Upload Photo"}
+      <input
+        type="file"
+        onChange={e => handleFileUpload(e, type)}
+        accept={type === "video" ? "video/*" : "image/*"}
+        multiple
+        className="hidden"
+      />
+    </label>
   )
 
-  const renderMediaList = (
+  const renderMediaGrid = (
     mediaList: string[],
     type: "profile" | "detail" | "selfie" | "video",
   ) => (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4">
       {mediaList.map((media, index) => (
-        <div key={index} className="relative group">
+        <div key={index} className="relative group aspect-square">
           {type === "video" ? (
             <video
               src={media}
-              className="h-32 w-full rounded-md object-cover"
+              className="w-full h-full object-cover"
               controls
             />
           ) : (
             <img
               src={media}
               alt={`${type} ${index + 1}`}
-              className="h-32 w-full rounded-md object-cover"
+              className="w-full h-full object-cover"
             />
           )}
           <button
             onClick={() => handleRemoveMedia(media, type)}
-            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer hover:bg-red-600"
+            className="absolute top-2 right-2 bg-accent p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             aria-label={`Remove ${type}`}
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <XMarkIcon className="w-4 h-4 text-secondary" />
           </button>
         </div>
       ))}
     </div>
   )
 
+  const tabs: Array<"profile" | "detail" | "selfie" | "video"> = [
+    "profile",
+    "detail",
+    "selfie",
+    "video",
+  ]
+
   return (
-    <div className="space-y-8 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">Manage Your Media</h2>
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Manage Media</h2>
+
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex space-x-2 md:space-x-4">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-3 py-2 text-sm whitespace-nowrap transition-all duration-300 ${
+                activeTab === tab
+                  ? "vogue-button"
+                  : "text-primary hover:bg-gray-100"
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Profile Photos (Max 3)
-          </h3>
-          {renderUploadSection("profile", 3)}
-          {renderMediaList(profile?.profilePhotos || [], "profile")}
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Detail Photos (Max 10)
-          </h3>
-          {renderUploadSection("detail", 10)}
-          {renderMediaList(profile?.detailPhotos || [], "detail")}
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Selfie Photos (Max 10)
-          </h3>
-          {renderUploadSection("selfie", 10)}
-          {renderMediaList(profile?.selfiePhotos || [], "selfie")}
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Videos (Max 3)
-          </h3>
-          {renderUploadSection("video", 3)}
-          {renderMediaList(profile?.videos || [], "video")}
-        </div>
+        {renderUploadButton(activeTab)}
+        {renderMediaGrid(
+          (profile?.[`${activeTab}Photos` as keyof Escort] as string[]) || [],
+          activeTab,
+        )}
       </div>
 
       {uploading && (

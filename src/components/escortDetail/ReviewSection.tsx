@@ -10,13 +10,9 @@ import { formatDate } from "./Helper"
 
 interface ReviewSectionProps {
   escortId: string
-  escortUserId: string
 }
 
-const ReviewSection: React.FC<ReviewSectionProps> = ({
-  escortId,
-  escortUserId,
-}) => {
+const ReviewSection: React.FC<ReviewSectionProps> = ({ escortId }) => {
   const [reviews, setReviews] = useState<Review[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -76,7 +72,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({
   return (
     <section className="mb-20">
       <h2 className="vogue-heading text-4xl mb-8">Reviews</h2>
-      {user.userType !== "escort" && (
+      {user.userType !== "advertiser" && (
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-primary text-secondary px-4 py-2 rounded mb-4"
@@ -87,7 +83,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({
       <ReviewList
         reviews={reviews}
         currentUser={user}
-        escortUserId={escortUserId}
+        escortUserId={escortId}
         onUpdateReview={handleUpdateReview}
         onDeleteReview={handleDeleteReview}
       />

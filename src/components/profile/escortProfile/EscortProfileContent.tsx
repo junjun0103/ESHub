@@ -7,46 +7,51 @@ import {
   selectUserStatusProfile,
   setUserEscortProfile,
   setStatusUserProfile,
+  setUserStories,
+  setStatusSaveUserProfile,
+  selectUserStories,
+  setStatusUserStories,
+  selectUserStoriesStatus,
 } from "../../../features/user/userSlice"
-import {
-  selectStories,
-  selectStoriesStatus,
-  setStories,
-  setStoryStatus,
-} from "../../../features/stories/storiesSlice"
-import { ChevronDownIcon } from "@heroicons/react/24/solid"
-import { fetchUserEscortProfile } from "../../../features/user/userAPI"
-import { fetchStoriesByUserId } from "../../../features/stories/storiesAPI"
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline"
+import Dashboard from "./Dashboard"
 import InformationManagement from "./InformationManagement"
 import MediaSection from "./MediaSection"
-import PaymentPlans from "./PaymentPlans"
 import RatesTable from "./RatesTable"
 import ServiceSection from "./ServiceSection"
-import Dashboard from "./Dashboard"
 import StoriesSection from "./StoriesSection"
+import PaymentPlans from "./PaymentPlans"
 import VerificationSection from "./VerificationSection"
-import type { Story } from "../../../types"
+import type { Story, Escort } from "../../../types"
+import { db, auth, functions } from "../../../firebase/config"
+import { doc, getDoc, setDoc } from "firebase/firestore"
+import { httpsCallable } from "firebase/functions"
+import { Message } from "../../common/Message"
 
 const EscortProfileContent: React.FC = () => {
   const dispatch = useAppDispatch()
   const user = useAppSelector(selectUser)
   const escortProfile = useAppSelector(selectUserEscortProfile)
   const statusUserProfile = useAppSelector(selectUserStatusProfile)
-  const stories: Story[] = useAppSelector(selectStories)
-  const statusStories = useAppSelector(selectStoriesStatus)
+  const stories = useAppSelector(selectUserStories)
+  const statusStories = useAppSelector(selectUserStoriesStatus)
 
-  const [activeSection, setActiveSection] = useState("information")
+  const [activeSection, setActiveSection] = useState("dashboard")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (user && user.userType === "escort" && !escortProfile) {
+      if (user && user.userType === "advertiser") {
         dispatch(setStatusUserProfile("loading"))
         try {
-          const useMockData = true
-          const profile = await fetchUserEscortProfile(user.id, useMockData)
-          dispatch(setUserEscortProfile(profile))
-          dispatch(setStatusUserProfile("idle"))
+          const fetchedEscortProfileById = httpsCallable(
+            functions,
+            "escortProfile-getEscortProfileByUserId",
+          )
+          const result = await fetchedEscortProfileById({ escortId: user.id })
+          if (result.data) {
+            dispatch(setUserEscortProfile(result.data as Escort))
+          }
         } catch (error) {
           console.error("Failed to fetch escort profile:", error)
           dispatch(setStatusUserProfile("failed"))
@@ -55,63 +60,82 @@ const EscortProfileContent: React.FC = () => {
     }
 
     const fetchStories = async () => {
-      if (user && user.userType === "escort" && !escortProfile) {
-        dispatch(setStoryStatus("loading"))
+      if (user && user.userType === "advertiser" && !stories) {
+        dispatch(setStatusUserStories("loading"))
         try {
-          const useMockData = true
-          const stories = await fetchStoriesByUserId(user.id, useMockData)
-          dispatch(setStories(stories))
-          dispatch(setStoryStatus("idle"))
+          const fetchedStories = await getDoc(doc(db, "stories", user.id))
+          if (!fetchedStories.exists()) {
+            const emptyStory: Story = {
+              id: user.id,
+            }
+            try {
+              await setDoc(doc(db, "stories", user.id), emptyStory)
+              dispatch(setUserStories(emptyStory))
+            } catch (error) {
+              console.error("Failed to create a new profile:", error)
+              dispatch(setStatusUserStories("failed"))
+            }
+          } else {
+            dispatch(setUserStories(fetchedStories.data() as Story))
+          }
         } catch (error) {
-          console.error("Failed to fetch escort story:", error)
-          dispatch(setStoryStatus("failed"))
+          console.error("Failed to fetch escort stories:", error)
+          dispatch(setStatusUserStories("failed"))
         }
       }
     }
 
     fetchProfile()
     fetchStories()
-  }, [user, escortProfile, dispatch])
+  }, [user])
 
-  const handleUpdateProfile = (updatedData: Partial<typeof escortProfile>) => {
-    if (user && escortProfile) {
-      dispatch(
-        setUserEscortProfile({
-          ...escortProfile,
-          ...updatedData,
-        }),
+  const handleUpdateProfile = async (
+    updatedData: Partial<typeof escortProfile>,
+  ) => {
+    setStatusSaveUserProfile("loading")
+    if (user && user.userType === "advertiser") {
+      const saveEscortProfile = httpsCallable(
+        functions,
+        "escortProfile-saveEscortProfile",
       )
-      // Here you would typically also update the profile in your backend
+      const result = await saveEscortProfile({ updatedData })
+      const data = result.data
+      if (data) {
+        dispatch(setUserEscortProfile(data as Escort))
+        // Show success message
+      } else {
+        // Show error message
+      }
     }
-  }
-
-  const handleSectionChange = (sectionId: string) => {
-    setActiveSection(sectionId)
-    setIsMenuOpen(false)
+    setStatusSaveUserProfile("idle")
   }
 
   const navigationItems = [
     { id: "dashboard", label: "Dashboard" },
     { id: "information", label: "Information" },
-    { id: "media", label: "Media" },
-    { id: "payment", label: "Payment Plans" },
-    { id: "rates", label: "Rates Table" },
-    { id: "services", label: "Services" },
     { id: "stories", label: "Stories" },
+    { id: "media", label: "Media" },
+    { id: "rates", label: "Rates" },
+    { id: "services", label: "Services" },
     { id: "verification", label: "Verification" },
+    { id: "payment", label: "Payment" },
   ]
 
-  const renderActiveSection = () => {
+  const renderContent = () => {
     if (statusUserProfile === "loading") {
-      return <div>Loading profile...</div>
+      return <div className="p-4 text-gray-500">Loading profile...</div>
     }
 
     if (statusUserProfile === "failed") {
-      return <div>Failed to load profile. Please try again later.</div>
+      return (
+        <div className="p-4 text-red-500">
+          Failed to load profile. Please try again later.
+        </div>
+      )
     }
 
     if (!escortProfile) {
-      return <div>No profile data available.</div>
+      return <div className="p-4 text-gray-500">No profile data available.</div>
     }
 
     switch (activeSection) {
@@ -137,13 +161,6 @@ const EscortProfileContent: React.FC = () => {
             onUpdate={handleUpdateProfile}
           />
         )
-      case "payment":
-        return (
-          <PaymentPlans
-            profile={escortProfile}
-            onUpdate={handleUpdateProfile}
-          />
-        )
       case "rates":
         return (
           <RatesTable profile={escortProfile} onUpdate={handleUpdateProfile} />
@@ -156,7 +173,7 @@ const EscortProfileContent: React.FC = () => {
           />
         )
       case "stories":
-        return <StoriesSection stories={stories} profile={escortProfile} />
+        return <StoriesSection story={stories} profile={escortProfile} />
       case "verification":
         return (
           <VerificationSection
@@ -164,36 +181,54 @@ const EscortProfileContent: React.FC = () => {
             onUpdate={handleUpdateProfile}
           />
         )
+      case "payment":
+        return (
+          <PaymentPlans
+            profile={escortProfile}
+            onUpdate={handleUpdateProfile}
+          />
+        )
       default:
-        return <div>Select a section</div>
+        return <div className="p-4 text-gray-500">Select a section</div>
     }
   }
 
   return (
-    <div>
-      {/* Mobile and Tablet Navigation */}
-      <div className="md:hidden mb-6">
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="w-full flex items-center justify-between px-4 py-2 bg-accent-gold text-white rounded-md"
+    <div className="max-w-screen-xl mx-auto">
+      {/* Header */}
+      <header className="border-b border-gray-200">
+        <div className="flex justify-between items-center py-4 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-serif font-bold">Profile</h1>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden"
+          >
+            {isMenuOpen ? (
+              <XMarkIcon className="h-6 w-6" />
+            ) : (
+              <Bars3Icon className="h-6 w-6" />
+            )}
+          </button>
+        </div>
+      </header>
+
+      <div className="flex flex-col md:flex-row">
+        {/* Navigation */}
+        <nav
+          className={`md:w-1/4 lg:w-1/5 border-r border-gray-200 ${isMenuOpen ? "block" : "hidden md:block"}`}
         >
-          <span>
-            {navigationItems.find(item => item.id === activeSection)?.label}
-          </span>
-          <ChevronDownIcon
-            className={`w-5 h-5 transition-transform ${isMenuOpen ? "transform rotate-180" : ""}`}
-          />
-        </button>
-        {isMenuOpen && (
-          <ul className="mt-2 border border-accent-gold rounded-md overflow-hidden">
+          <ul className="py-4">
             {navigationItems.map(item => (
               <li key={item.id}>
                 <button
-                  onClick={() => handleSectionChange(item.id)}
-                  className={`w-full text-left px-4 py-2 ${
+                  onClick={() => {
+                    setActiveSection(item.id)
+                    setIsMenuOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm ${
                     activeSection === item.id
-                      ? "bg-accent-gold text-white"
-                      : "text-accent-gold hover:bg-accent-gold hover:bg-opacity-10"
+                      ? "font-bold"
+                      : "text-gray-600 hover:text-black"
                   }`}
                 >
                   {item.label}
@@ -201,30 +236,11 @@ const EscortProfileContent: React.FC = () => {
               </li>
             ))}
           </ul>
-        )}
+        </nav>
+
+        {/* Content Area */}
+        <main className="flex-1 py-4">{renderContent()}</main>
       </div>
-
-      {/* Desktop Navigation */}
-      <nav className="hidden md:block mb-6">
-        <ul className="flex flex-wrap space-x-2">
-          {navigationItems.map(item => (
-            <li key={item.id}>
-              <button
-                onClick={() => setActiveSection(item.id)}
-                className={`px-3 py-2 rounded-md transition-all duration-300 ${
-                  activeSection === item.id
-                    ? "bg-accent-gold text-white shadow-md"
-                    : "text-accent-gold hover:bg-accent-gold hover:bg-opacity-10"
-                }`}
-              >
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {renderActiveSection()}
     </div>
   )
 }

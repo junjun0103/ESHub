@@ -1,7 +1,8 @@
 import type React from "react"
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 import type { Language } from "../../../../types"
 
-interface PreferencesSectionProps {
+interface LanguagesAndSmokingProps {
   languages: Language[]
   updateLanguage: (
     index: number,
@@ -14,7 +15,7 @@ interface PreferencesSectionProps {
   setSmoker: (smoker: boolean) => void
 }
 
-const LanguagesAndSmoking: React.FC<PreferencesSectionProps> = ({
+const LanguagesAndSmoking: React.FC<LanguagesAndSmokingProps> = ({
   languages,
   smoker,
   updateLanguage,
@@ -23,93 +24,65 @@ const LanguagesAndSmoking: React.FC<PreferencesSectionProps> = ({
   setSmoker,
 }) => {
   return (
-    <>
+    <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Languages
-        </label>
-        <table className="w-full mb-2 text-sm">
-          <thead>
-            <tr>
-              <th className="text-left p-2 text-gray-300">Language</th>
-              <th className="text-left p-2 text-gray-300">Proficiency</th>
-              <th className="text-left p-2 text-gray-300">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {languages.map((lang, index) => (
-              <tr key={index} className="border-b border-gray-700">
-                <td className="py-2">
-                  <input
-                    type="text"
-                    value={lang.name}
-                    onChange={e =>
-                      updateLanguage(index, "name", e.target.value)
-                    }
-                    className="w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                  />
-                </td>
-                <td className="py-2">
-                  <select
-                    value={lang.level}
-                    onChange={e =>
-                      updateLanguage(index, "level", e.target.value)
-                    }
-                    className="w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                  >
-                    <option value="Basic">Basic</option>
-                    <option value="Conversational">Conversational</option>
-                    <option value="Fluent">Fluent</option>
-                    <option value="Native">Native</option>
-                  </select>
-                </td>
-                <td className="py-2">
-                  <button
-                    type="button"
-                    onClick={() => removeLanguage(index)}
-                    className="text-red-400 hover:text-red-300 transition-colors p-1"
-                    aria-label="Remove language"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="space-y-4">
+          {languages.map((lang, index) => (
+            <div key={index} className="bg-gray-100 p-4 rounded-lg space-y-2">
+              <div className="flex justify-between items-center">
+                <input
+                  type="text"
+                  value={lang.name}
+                  onChange={e => updateLanguage(index, "name", e.target.value)}
+                  className="vogue-input flex-grow"
+                  placeholder="Language name"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeLanguage(index)}
+                  className="vogue-button-secondary p-2 ml-2"
+                  aria-label="Remove language"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+              <select
+                value={lang.level}
+                onChange={e => updateLanguage(index, "level", e.target.value)}
+                className="vogue-input w-full"
+              >
+                <option value="Basic">Basic</option>
+                <option value="Conversational">Conversational</option>
+                <option value="Fluent">Fluent</option>
+                <option value="Native">Native</option>
+              </select>
+            </div>
+          ))}
+        </div>
         <button
           type="button"
           onClick={addLanguage}
-          className="bg-accent-gold text-gray-900 px-4 py-2 rounded hover:bg-opacity-80 transition-colors"
+          className="vogue-button mt-4 flex items-center justify-center w-full sm:w-auto"
           disabled={languages.length >= 5}
         >
+          <PlusIcon className="h-5 w-5 mr-2" />
           Add Language
         </button>
       </div>
 
-      <div>
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={smoker}
-            onChange={e => setSmoker(e.target.checked)}
-            className="rounded border-gray-700 text-accent-gold focus:ring-accent-gold h-4 w-4"
-          />
-          <span className="ml-2 text-sm text-gray-300">Smoker</span>
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="smoker"
+          checked={smoker}
+          onChange={e => setSmoker(e.target.checked)}
+          className="vogue-checkbox"
+        />
+        <label htmlFor="smoker" className="ml-2 text-sm">
+          Smoker
         </label>
       </div>
-    </>
+    </div>
   )
 }
 

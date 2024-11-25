@@ -12,10 +12,10 @@ const mockStories: Story[] = [
       "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
     ],
     description: "A lovely day at the beach",
-    createdAt: new Date("2024-08-20T18:00:00Z"),
+    createdAt: new Date("2024-08-20T18:00:00Z").toISOString(),
     expiresAt: new Date(
       new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
-    ),
+    ).toISOString(),
     suburb: "Foresthill",
     location: "Auckland",
     latitude: -33.8568,
@@ -27,10 +27,10 @@ const mockStories: Story[] = [
     userId: "2",
     imageUrls: ["https://example.com/image3.jpg"],
     description: "Enjoying a night out",
-    createdAt: new Date("2024-08-20T18:00:00Z"),
+    createdAt: new Date("2024-08-20T18:00:00Z").toISOString(),
     expiresAt: new Date(
       new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
-    ),
+    ).toISOString(),
     suburb: "Foresthill",
     location: "Auckland",
     latitude: -33.8568,
@@ -48,15 +48,17 @@ export const fetchStoriesByUserId = async (
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500))
     return mockStories.filter(story => story.userId === userId)
-  } else {
-    const stories = (await getDocuments(
-      "stories",
-      "userId",
-      "==",
-      userId,
-    )) as Story[]
-    return stories
   }
+  return []
+  // else {
+  //   const stories = (await getDocuments(
+  //     "stories",
+  //     "userId",
+  //     "==",
+  //     userId,
+  //   )) as Story[]
+  //   return stories
+  // }
 }
 
 export const addStory = async (

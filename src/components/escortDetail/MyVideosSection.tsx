@@ -32,7 +32,7 @@ const MyVideosSection: React.FC<MyVideosSectionProps> = ({ videos }) => {
   }
 
   return (
-    <section className="mb-20">
+    <section id="videos" className="mb-20">
       <h2 className="vogue-heading text-4xl mb-8">My Videos</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {videos.map((video, index) => (

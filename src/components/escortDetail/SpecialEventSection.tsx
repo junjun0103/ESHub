@@ -11,7 +11,7 @@ const SpecialEventSection: React.FC<Props> = ({ escort }) => {
       {escort.isSpecialEventActive && (
         <section className="mb-20">
           <h2 className="text-4xl font-serif font-bold mb-8">Special Event</h2>
-          <p className="text-lg leading-relaxed">{escort.eventDescription}</p>
+          <p className="vogue-body text-lg">{escort.eventDescription}</p>
         </section>
       )}{" "}
     </div>

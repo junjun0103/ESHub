@@ -1,19 +1,24 @@
 import type React from "react"
 import { useState, useEffect } from "react"
-import type { Story } from "../../types"
+import type { Story, StoryEntry } from "../../types"
 import StoryModal from "./StoryModal"
 import { truncateDescription } from "./Helper"
 
 interface StoriesSectionProps {
-  stories: Story[]
+  stories: Story
 }
 
 const StoriesSection: React.FC<StoriesSectionProps> = ({ stories }) => {
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(
     null,
   )
+
+  const storyEntriesArray: StoryEntry[] = Object.values(
+    stories.storyEntries || {},
+  )
+
   const [currentImageIndexes, setCurrentImageIndexes] = useState<number[]>(
-    stories.map(() => 0),
+    storyEntriesArray.map(() => 0),
   )
 
   useEffect(() => {
@@ -21,13 +26,13 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({ stories }) => {
       setCurrentImageIndexes(prevIndexes =>
         prevIndexes.map(
           (currentIndex, storyIndex) =>
-            (currentIndex + 1) % stories[storyIndex].imageUrls.length,
+            (currentIndex + 1) % storyEntriesArray[storyIndex].imageUrls.length,
         ),
       )
     }, 1000) // Change image every 1 second
 
     return () => clearInterval(interval)
-  }, [stories])
+  }, [storyEntriesArray])
 
   const openStory = (index: number) => {
     setSelectedStoryIndex(index)
@@ -40,26 +45,26 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({ stories }) => {
   return (
     <section className="py-8">
       <div className="flex space-x-4 overflow-x-auto pb-4">
-        {stories.map((story, index) => (
+        {storyEntriesArray.map((storyEntry, index) => (
           <button
-            key={story.id}
+            key={storyEntry.id}
             onClick={() => openStory(index)}
             className="flex-shrink-0 focus:outline-none"
           >
             <img
-              src={story.imageUrls[currentImageIndexes[index]]}
+              src={storyEntry.imageUrls[currentImageIndexes[index]]}
               alt={`Story ${index + 1}`}
               className="w-24 h-24 rounded-full object-cover border-2 border-accent"
             />
             <p className="text-sm overflow-hidden">
-              {truncateDescription(story.description, 10)}
+              {truncateDescription(storyEntry.description, 10)}
             </p>
           </button>
         ))}
       </div>
       {selectedStoryIndex !== null && (
         <StoryModal
-          stories={stories}
+          stories={storyEntriesArray}
           initialStoryIndex={selectedStoryIndex}
           onClose={closeStory}
         />

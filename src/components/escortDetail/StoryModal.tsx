@@ -1,10 +1,10 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import type { Story } from "../../types"
+import type { StoryEntry } from "../../types"
 
 interface StoryModalProps {
-  stories: Story[]
+  stories: StoryEntry[]
   initialStoryIndex: number
   onClose: () => void
 }
@@ -76,10 +76,10 @@ const StoryModal: React.FC<StoryModalProps> = ({
     setIsPaused(false)
   }
 
-  const getTimeAgo = (date: Date) => {
+  const getTimeAgo = (timestamp: number) => {
     const now = new Date()
     const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+      (now.getTime() - timestamp) / (1000 * 60 * 60),
     )
     return `${diffInHours} hours ago`
   }

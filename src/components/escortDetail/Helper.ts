@@ -5,7 +5,7 @@ export const truncateDescription = (description: string, maxLength: number) => {
   return description
 }
 
-export const formatDate = (date: Date): string => {
+export const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

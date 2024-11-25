@@ -25,31 +25,6 @@
     line-height: 1.5;
   }
 
-  /* h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: "Playfair Display", serif;
-  }
-
-  h1 {
-    font-size: var(--font-size-xxxl);
-  }
-
-  h2 {
-    font-size: var(--font-size-xxl);
-  }
-
-  h3 {
-    font-size: var(--font-size-xl);
-  }
-
-  h4 {
-    font-size: var(--font-size-lg);
-  } */
-
   a {
     @apply text-primary hover:text-accent transition-colors;
   }
@@ -73,11 +48,6 @@
   .text-shadow {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
 }
 
 /* Custom scrollbar */

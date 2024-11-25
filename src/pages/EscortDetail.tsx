@@ -20,43 +20,21 @@ import AboutMeSection from "../components/escortDetail/AboutMeSection"
 import ReviewSection from "../components/escortDetail/ReviewSection"
 import MyVideosSection from "../components/escortDetail/MyVideosSection"
 import PreferenceSection from "../components/escortDetail/PreferenceSection"
+import TimeTableSection from "../components/escortDetail/TimeTableSection"
 
 const EscortDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const [escort, setEscort] = useState<Escort | null>(null)
-  const [stories, setStories] = useState<Story[]>([])
+  const [stories, setStories] = useState<Story | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const dispatch = useAppDispatch()
-  const user = useAppSelector(selectUser)
 
   useEffect(() => {
     const fetchEscortData = async () => {
       setLoading(true)
       try {
-        const mockData = true
-        const escortData = await fetchEscortById(id!, mockData)
-        setEscort(escortData)
-        const dummyStories: Story[] = [
-          {
-            id: "1",
-            userId: "escort-001",
-            imageUrls: [
-              "https://media.istockphoto.com/id/1416048929/photo/woman-working-on-laptop-online-checking-emails-and-planning-on-the-internet-while-sitting-in.jpg?s=1024x1024&w=is&k=20&c=rsMEfrDiYh3Y2CbJ8OQYRfJZ2kOGBneREKETBn0vyjU=",
-              "https://sample-il.com/wp-content/uploads/2023/08/EmptyName-3.jpg",
-            ],
-            description: "Enjoying my day!",
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-            expiresAt: new Date(Date.now() + 22 * 60 * 60 * 1000),
-            suburb: "Forrest Hill",
-            location: "Auckland",
-            latitude: 0,
-            longitude: 0,
-            views: 0,
-          },
-          // Add more dummy stories as needed
-        ]
-        setStories(dummyStories)
+        // Fetch escort details
       } catch (err) {
         setError("Failed to load escort details")
       } finally {
@@ -75,7 +53,8 @@ const EscortDetail: React.FC = () => {
       <IntroductionSection escort={escort} />
       <div className="bg-secondary text-primary">
         <div className="vogue-container py-16">
-          <StoriesSection stories={stories} />
+          {/* Stories */}
+          {stories && <StoriesSection stories={stories} />}
           {/* About Me */}
           <AboutMeSection escort={escort} />
           {/* Gallery */}
@@ -96,10 +75,12 @@ const EscortDetail: React.FC = () => {
           <MyVideosSection videos={escort.videos || []} />
           {/* Preference Section */}
           <PreferenceSection escort={escort} />
+          {/* Time Table */}
+          <TimeTableSection escort={escort} />
           {/* Q&A Section */}
-          <QnASection escortId={escort.id} escortUserId={escort.userId} />
+          <QnASection escortId={escort.id} />
           {/* Review Section */}
-          <ReviewSection escortId={escort.id} escortUserId={escort.userId} />
+          <ReviewSection escortId={escort.id} />
         </div>
       </div>
     </Layout>

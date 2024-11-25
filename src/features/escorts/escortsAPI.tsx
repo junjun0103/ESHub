@@ -32,7 +32,7 @@ const mockEscorts: Escort[] = escortIds.map(item => ({
   age: 28,
   aboutMe:
     "Sophia is a charismatic and elegant companion, perfect for any occasion.",
-  timeTable: [{ day: "Monday", from: "7AM", untill: "7PM" }],
+  timeTable: [{ day: "Monday", from: "7AM", until: "7PM" }],
   availability: "MON 7AM to 7PM\nTUE 7AM to 7PM",
   suburb: "Bondi Beach",
   location: "Sydney",
@@ -183,13 +183,13 @@ const mockEscorts: Escort[] = escortIds.map(item => ({
   paymentPlan: {
     tier: "Premium",
     duration: "3 months",
-    startDate: new Date("2024-08-20T18:00:00Z"),
+    startDate: new Date("2024-08-20T18:00:00Z").toISOString(),
     endDate: new Date(
       new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
-    ),
+    ).toISOString(),
   },
   verificationStatus: "verified",
-  verifiedDate: Date.now(),
+  verifiedDate: new Date("2024-08-20T18:00:00Z").toISOString(),
   isProfileActive: true,
   isReviewActive: true,
   isPreferencesActive: true,
@@ -205,9 +205,9 @@ const mockEscorts: Escort[] = escortIds.map(item => ({
   experiencePace: "Slow and Sensual",
   touchPreference: "Soft",
   roleplayPreference: "Boss and Secretary",
-  lastUpdate: new Date("2024-08-20T18:00:00Z"),
-  LastLogin: new Date("2024-08-20T18:00:00Z"),
-  createdAt: new Date("2024-08-20T18:00:00Z"),
+  lastUpdate: new Date("2024-08-20T18:00:00Z").toISOString(),
+  LastLogin: new Date("2024-08-20T18:00:00Z").toISOString(),
+  createdAt: new Date("2024-08-20T18:00:00Z").toISOString(),
   latitude: -33.8568,
   longitude: 151.2153,
 }))

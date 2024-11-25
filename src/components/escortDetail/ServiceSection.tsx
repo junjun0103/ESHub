@@ -12,9 +12,9 @@ const ServiceSection: React.FC<Props> = ({ escort }) => {
       <div className="vogue-grid">
         <div>
           <h3 className="vogue-subheading text-2xl mb-4">Base Services</h3>
-          <ul className="vogue-body list-disc list-inside">
+          <ul className="vogue-body list-disc list-inside flex flex-wrap">
             {escort.baseServices.map((service, index) => (
-              <li key={index} className="mb-2">
+              <li key={index} className="mb-2 w-1/2">
                 {service}
               </li>
             ))}
@@ -23,9 +23,9 @@ const ServiceSection: React.FC<Props> = ({ escort }) => {
         {escort.extraServices && (
           <div>
             <h3 className="vogue-subheading text-2xl mb-4">Extra Services</h3>
-            <ul className="vogue-body list-disc list-inside">
+            <ul className="vogue-body list-disc list-inside flex flex-wrap">
               {escort.extraServices.map((service, index) => (
-                <li key={index} className="mb-2">
+                <li key={index} className="mb-2 w-1/2">
                   {service}
                 </li>
               ))}

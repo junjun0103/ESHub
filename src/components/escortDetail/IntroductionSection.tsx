@@ -14,7 +14,7 @@ const IntroductionSection: React.FC<IntroductionSectionProps> = ({
     <section className="relative w-full h-screen overflow-hidden bg-secondary">
       <div className="absolute inset-0 bg-black bg-opacity-30" />
       <motion.img
-        src={escort.profilePhotos[0]}
+        src={escort?.profilePhotos[0]}
         alt={escort.name}
         className="absolute inset-0 w-full h-full object-cover object-center"
         initial={{ scale: 1.1 }}
