@@ -13,6 +13,7 @@ import {
   areMandatoryFieldsComplete,
   getIncompleteMandatorySections,
 } from "../../../utils/profileHelper"
+import { Switch } from "antd"
 
 interface DashboardProps {
   stories: Story | null
@@ -98,14 +99,10 @@ const Dashboard: React.FC<DashboardProps> = ({
               />
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
+              <Switch
                 checked={isProfileActive}
                 onChange={() => handleToggle("isProfileActive")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent rounded-full peer peer-checked:bg-accent"></div>
-              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-all peer-checked:translate-x-5"></div>
             </label>
           </div>
 
@@ -122,14 +119,10 @@ const Dashboard: React.FC<DashboardProps> = ({
               />
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
+              <Switch
                 checked={isReviewActive}
                 onChange={() => handleToggle("isReviewActive")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent rounded-full peer peer-checked:bg-accent"></div>
-              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-all peer-checked:translate-x-5"></div>
             </label>
           </div>
         </div>

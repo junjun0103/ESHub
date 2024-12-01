@@ -1,5 +1,6 @@
 import type React from "react"
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
+import { Switch } from "antd"
 
 interface PreferencesSectionProps {
   favoritePosition: string
@@ -77,15 +78,10 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="vogue-body mb-2">Active Status</h3>
-        <button
-          onClick={() => setIsPreferencesActive(!isPreferencesActive)}
-          className={`vogue-button-secondary flex items-center ${
-            isPreferencesActive ? "bg-accent text-white" : "bg-gray-200"
-          }`}
-        >
-          <ArrowsRightLeftIcon className="h-5 w-5 mr-2" />
-          {isPreferencesActive ? "Active" : "Inactive"}
-        </button>
+        <Switch
+          checked={isPreferencesActive}
+          onChange={() => setIsPreferencesActive(!isPreferencesActive)}
+        />
       </div>
 
       {isPreferencesActive && (

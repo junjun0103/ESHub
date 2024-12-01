@@ -1,6 +1,5 @@
 import type React from "react"
 import { useState, useEffect } from "react"
-import Select from "react-select"
 import {
   type Escort,
   type Language,
@@ -9,6 +8,8 @@ import {
   locationOptions,
   type Address,
   ethinicityOptions,
+  escortTypeOptions,
+  escourtServiceOptions,
 } from "../../../types"
 import PreferencesSection from "./components/PreferencesSection"
 import LanguagesAndSmoking from "./components/LanguagesAndSmoking"
@@ -19,6 +20,7 @@ import AddressAutofillComponent from "./components/AddressAutoFillComponent"
 import InputText from "./components/InputText"
 import InputNumber from "./components/InputNumber"
 import InputSelector from "./components/InputSelector"
+import { Switch } from "antd"
 
 interface InformationManagementProps {
   profile: Escort | null
@@ -51,18 +53,19 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [contacts, setContacts] = useState<Contact[]>(profile?.contacts || [])
   const [aboutMe, setAboutMe] = useState(profile?.aboutMe || "")
   const [availability, setAvailability] = useState(profile?.availability || "")
+
+  // timeTable is an array of objects
   const [timeTable, setTimeTable] = useState<TimeTable[]>(
     profile?.timeTable || [
-      { day: "monday", from: "", until: "" },
-      { day: "tuesday", from: "", until: "" },
-      { day: "wednesday", from: "", until: "" },
-      { day: "thursday", from: "", until: "" },
-      { day: "friday", from: "", until: "" },
-      { day: "saturday", from: "", until: "" },
-      { day: "sunday", from: "", until: "" },
+      { day: "Monday", from: "", until: "", status: false },
+      { day: "Tuesday", from: "", until: "", status: false },
+      { day: "Wednesday", from: "", until: "", status: false },
+      { day: "Thursday", from: "", until: "", status: false },
+      { day: "Friday", from: "", until: "", status: false },
+      { day: "Saturday", from: "", until: "", status: false },
+      { day: "Sunday", from: "", until: "", status: false },
     ],
   )
-
   const [isSpecialEventActive, setIsSpecialEventActive] = useState(
     profile?.isSpecialEventActive || false,
   )
@@ -218,13 +221,14 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     setContacts(updatedContacts)
   }
 
-  const resetTime = (index: number) => {
+  const updateTimeTableStatus = (index: number, status: boolean) => {
     // Reset the time for the selected index
-    const updatedTimeTable = [...timeTable]
+    console.log("JUN HERE updateTimeTableStatus", index, status)
+
+    const updatedTimeTable = Object.values(timeTable)
     updatedTimeTable[index] = {
       ...updatedTimeTable[index],
-      from: "",
-      until: "",
+      status: status,
     }
     setTimeTable(updatedTimeTable)
   }
@@ -234,8 +238,11 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     field: "day" | "from" | "until",
     value: string,
   ) => {
-    const updatedTimeTable = [...timeTable]
-    updatedTimeTable[index][field] = value
+    const updatedTimeTable = Object.values(timeTable)
+    updatedTimeTable[index] = {
+      ...updatedTimeTable[index],
+      [field]: value,
+    }
     setTimeTable(updatedTimeTable)
   }
 
@@ -271,28 +278,28 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           "greeting",
           <div className="space-y-4">
             <InputText
-              label="*Greeting"
+              label="Greeting"
               value={greeting}
               onChange={setGreeting}
               placeholder="Greeting message: ex) Hi,"
               maxLength={10}
             />
             <InputText
-              label="*Name"
+              label="Name"
               value={name}
               onChange={setName}
               placeholder="Name"
               maxLength={10}
             />
             <InputNumber
-              label="*Age"
+              label="Age"
               value={age}
               onChange={setAge}
               placeholder="Age"
               maxLength={2}
             />
             <InputSelector
-              label="*Location"
+              label="Location"
               value={location}
               onChange={setLocation}
               options={locationOptions}
@@ -326,7 +333,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
             setAvailability={setAvailability}
             timeTable={timeTable}
             updateTimeTable={updateTimeTable}
-            resetTime={resetTime}
+            updateTimeTableStatus={updateTimeTableStatus}
           />,
         )}
 
@@ -334,26 +341,20 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           "*Professional Information",
           "professionalInfo",
           <div className="space-y-4">
-            <select
+            <InputSelector
+              label="Escort Type"
               value={escortType}
-              onChange={e => setEscortType(e.target.value)}
-              className="vogue-input w-full"
-            >
-              <option value="">Select escort type</option>
-              <option value="Agency">Agency</option> //TODO: make it an enum
-              <option value="Private">Private</option>
-            </select>
-            <select
+              onChange={setEscortType}
+              options={escortTypeOptions}
+              placeholder="Select escort type"
+            />
+            <InputSelector
+              label="Service Type"
               value={serviceType}
-              onChange={e => setServiceType(e.target.value)}
-              className="vogue-input w-full"
-            >
-              <option value="">Select service type</option>
-              <option value="Full service">Full service</option> //TODO: make it
-              an enum
-              <option value="Sensual Massage">Sensual Massage</option>
-              <option value="Pure Massage">Pure Massage</option>
-            </select>
+              onChange={setServiceType}
+              options={escourtServiceOptions}
+              placeholder="Select service type"
+            />
           </div>,
         )}
 
@@ -363,13 +364,10 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="vogue-body mb-2">Active Status</h3>
-              <button
-                type="button"
-                onClick={() => setIsSpecialEventActive(!isSpecialEventActive)}
-                className={`vogue-button-secondary ${isSpecialEventActive ? "bg-accent text-white" : ""}`}
-              >
-                {isSpecialEventActive ? "Active" : "Inactive"}
-              </button>
+              <Switch
+                checked={isSpecialEventActive}
+                onChange={() => setIsSpecialEventActive(!isSpecialEventActive)}
+              />
             </div>
             {isSpecialEventActive && (
               <textarea
@@ -387,21 +385,19 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           "Personal Information",
           "personalInfo",
           <div className="space-y-4">
-            <Select
-              value={ethinicityOptions.find(
-                option => option.value === ethnicity,
-              )}
-              onChange={option => setEthnicity(option?.value || "")}
+            <InputSelector
+              label="Enthicity"
+              value={ethnicity}
+              onChange={setEthnicity}
               options={ethinicityOptions}
-              className="vogue-select"
-              placeholder="Ethnicity"
+              placeholder="Select Ethnicity"
             />
-            <input
-              type="text"
+            <InputText
+              label="Occupation"
               value={occupation}
-              onChange={e => setOccupation(e.target.value)}
-              className="vogue-input w-full"
+              onChange={setOccupation}
               placeholder="Occupation"
+              maxLength={20}
             />
           </div>,
         )}
@@ -410,47 +406,47 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
           "Physical Attributes",
           "physicalAttributes",
           <div className="space-y-4">
-            <input
-              type="text"
+            <InputText
+              label="Height"
               value={height}
-              onChange={e => setHeight(e.target.value)}
-              className="vogue-input w-full"
+              onChange={setHeight}
               placeholder="Height"
+              maxLength={8}
             />
-            <input
-              type="number"
+            <InputText
+              label="Weight"
               value={weight}
-              onChange={e => setWeight(e.target.value)}
-              className="vogue-input w-full"
-              placeholder="Weight (kg)"
+              onChange={setWeight}
+              placeholder="Weight"
+              maxLength={3}
             />
-            <input
-              type="text"
+            <InputText
+              label="Hair Color"
               value={hairColor}
-              onChange={e => setHairColor(e.target.value)}
-              className="vogue-input w-full"
+              onChange={setHairColor}
               placeholder="Hair Color"
+              maxLength={10}
             />
-            <input
-              type="text"
+            <InputText
+              label="Hair Length"
               value={hairLength}
-              onChange={e => setHairLength(e.target.value)}
-              className="vogue-input w-full"
+              onChange={setHairLength}
               placeholder="Hair Length"
+              maxLength={10}
             />
-            <input
-              type="text"
+            <InputText
+              label="Bust Size"
               value={bustSize}
-              onChange={e => setBustSize(e.target.value)}
-              className="vogue-input w-full"
+              onChange={setBustSize}
               placeholder="Bust Size"
+              maxLength={10}
             />
-            <input
-              type="text"
+            <InputText
+              label="Body Type"
               value={bodyType}
-              onChange={e => setBodyType(e.target.value)}
-              className="vogue-input w-full"
+              onChange={setBodyType}
               placeholder="Body Type"
+              maxLength={10}
             />
           </div>,
         )}

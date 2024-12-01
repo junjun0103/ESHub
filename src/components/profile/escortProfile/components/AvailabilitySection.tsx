@@ -1,6 +1,7 @@
 import type React from "react"
-import { TrashIcon } from "@heroicons/react/24/outline"
 import type { TimeTable } from "../../../../types"
+import { TimePicker, Switch } from "antd"
+import dayjs from "dayjs"
 
 interface AvailabilitySectionProps {
   availability: string
@@ -10,8 +11,9 @@ interface AvailabilitySectionProps {
     index: number,
     field: "day" | "from" | "until",
     value: string,
+    status?: boolean,
   ) => void
-  resetTime: (index: number) => void
+  updateTimeTableStatus: (index: number, status: boolean) => void
 }
 
 const AvailabilitySection: React.FC<AvailabilitySectionProps> = ({
@@ -19,7 +21,7 @@ const AvailabilitySection: React.FC<AvailabilitySectionProps> = ({
   setAvailability,
   timeTable,
   updateTimeTable,
-  resetTime,
+  updateTimeTableStatus,
 }) => {
   const days = [
     "Monday",
@@ -48,34 +50,43 @@ const AvailabilitySection: React.FC<AvailabilitySectionProps> = ({
         <h3 className="vogue-body mb-1">Time Table</h3>
         {days.map((slot, index) => (
           <div key={index} className="bg-gray-100 p-2 rounded-lg space-y-2">
-            <div className="flex justify-between items-center">
-              <span>{slot}</span>
-              <button
-                type="button"
-                onClick={() => resetTime(index)}
-                className="vogue-button-secondary p-2 ml-2"
-                aria-label="Reset time"
-              >
-                <TrashIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex space-x-2">
-              <input
-                type="time"
-                value={timeTable[index]?.from}
-                onChange={e => updateTimeTable(index, "from", e.target.value)}
-                className="vogue-input flex-grow"
-                step={600}
-              />
-              <span className="flex items-center">to</span>
-              <input
-                type="time"
-                value={timeTable[index]?.until}
-                onChange={e => updateTimeTable(index, "until", e.target.value)}
-                className="vogue-input flex-grow"
-                step={600}
+            <div className="flex">
+              <span className="w-32">{slot}</span>
+              <Switch
+                className="w-10"
+                checked={timeTable[index]?.status}
+                onChange={status => {
+                  updateTimeTableStatus(index, status)
+                }}
               />
             </div>
+            {timeTable[index]?.status && (
+              <div className="flex space-x-2">
+                <TimePicker
+                  onChange={(_time, timeString) => {
+                    updateTimeTable(index, "from", timeString.toString())
+                  }}
+                  defaultOpenValue={dayjs(
+                    timeTable[index]?.from || "00:00",
+                    "HH:mm",
+                  )}
+                  value={dayjs(timeTable[index]?.from || "00:00", "HH:mm")}
+                  format="HH:mm"
+                />
+                <span className="flex items-center">to</span>
+                <TimePicker
+                  onChange={(_time, timeString) => {
+                    updateTimeTable(index, "until", timeString.toString())
+                  }}
+                  defaultOpenValue={dayjs(
+                    timeTable[index]?.until || "00:00",
+                    "HH:mm",
+                  )}
+                  value={dayjs(timeTable[index]?.until || "00:00", "HH:mm")}
+                  format="HH:mm"
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>

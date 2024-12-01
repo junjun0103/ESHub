@@ -10,8 +10,8 @@ interface ServiceSectionProps {
 
 interface Service {
   name: string
-  isOffered: boolean
-  isCustom: boolean
+  isOffered?: boolean
+  isCustom?: boolean
 }
 
 const defaultBaseServices: Service[] = [
@@ -62,7 +62,7 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
     if (profile?.baseServices) {
       const updatedBaseServices = defaultBaseServices.map(service => ({
         ...service,
-        isOffered: profile.baseServices.includes(service.name),
+        isOffered: profile?.baseServices?.includes(service.name),
       }))
       const baseCustomServices = profile.baseServices
         .filter(
@@ -87,6 +87,10 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
       setExtraServices(extraCustomServices)
     }
   }, [profile])
+
+  useEffect(() => {
+    console.log("JUN activeTab", activeTab)
+  }, [activeTab])
 
   const handleServiceToggle = (index: number, isBase: boolean) => {
     const services = isBase ? baseServices : extraServices
@@ -177,14 +181,14 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab("base")}
-            className={`vogue-button flex-1 ${activeTab === "base" ? "" : "bg-gray-200 text-primary"}`}
+            className={`vogue-button flex-1 ${activeTab === "base" ? "vogue-button-active" : ""}`}
           >
             Base Services
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("extra")}
-            className={`vogue-button flex-1 ${activeTab === "extra" ? "" : "bg-gray-200 text-primary"}`}
+            className={`vogue-button flex-1 ${activeTab === "extra" ? "vogue-button-active" : ""}`}
           >
             Extra Services
           </button>

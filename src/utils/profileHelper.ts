@@ -25,7 +25,8 @@ export function checkMandatoryFields(
         !!profile?.location &&
         !!profile?.address?.address &&
         !!profile?.aboutMe &&
-        !!profile?.occupation &&
+        !!profile?.escortType &&
+        !!profile?.serviceType &&
         (profile?.aboutMe?.length || 0) >= 1 &&
         (profile?.contacts?.length || 0) >= 1,
       isMandatory: true,
@@ -33,8 +34,8 @@ export function checkMandatoryFields(
     {
       name: "Media",
       isComplete:
-        (profile.profilePhotos?.length || 0) >= 1 &&
-        (profile.detailPhotos?.length || 0) >= 1,
+        (profile?.profilePhotos?.length || 0) >= 1 &&
+        (profile?.detailPhotos?.length || 0) >= 1,
       isMandatory: true,
     },
     {
@@ -45,14 +46,14 @@ export function checkMandatoryFields(
       isMandatory: true,
     },
     {
-      name: "Price Table",
+      name: "Rates",
       isComplete: (profile.ratesTable?.length || 0) >= 1,
       isMandatory: true,
     },
     {
       name: "Services",
       isComplete: (profile.baseServices?.length || 0) >= 1,
-      isMandatory: true,
+      isMandatory: false,
     },
     {
       name: "Stories (optional)",

@@ -125,3 +125,7 @@ html {
 .vogue-button {
   @apply bg-primary text-secondary px-6 py-3 text-sm uppercase tracking-wider hover:bg-accent transition-all duration-300;
 }
+
+.vogue-button-active {
+  @apply border-b-2 border-accent;
+}

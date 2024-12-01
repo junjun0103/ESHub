@@ -143,6 +143,7 @@ export interface TimeTable {
   day: string
   from: string
   until: string
+  status?: boolean
 }
 
 // QuestionAnswer
@@ -341,4 +342,15 @@ export const ethinicityOptions = [
   { value: "Anglo-Indian", label: "Anglo-Indian" },
   { value: "San (Southern Africa)", label: "San (Southern Africa)" },
   { value: "Taiwanese", label: "Taiwanese" },
+]
+
+export const escortTypeOptions = [
+  { value: "private", label: "Private" },
+  { value: "agency", label: "Agency" },
+]
+
+export const escourtServiceOptions = [
+  { value: "fullService", label: "Full service" },
+  { value: "sensualMassage", label: "Sensual Massage" },
+  { value: "pureMassage", label: "Pure Massage" },
 ]
