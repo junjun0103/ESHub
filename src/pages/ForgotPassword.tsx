@@ -86,6 +86,12 @@ const ForgotPassword: React.FC = () => {
             >
               {loading ? "Sending..." : "Reset Password"}
             </button>
+            <a
+              href="/login"
+              className="block text-center mt-2 text-sm text-indigo-600 hover:text-indigo-500"
+            >
+              Back to login page
+            </a>
           </div>
         </form>
       </div>

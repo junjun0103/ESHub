@@ -21,6 +21,7 @@ import InputText from "./components/InputText"
 import InputNumber from "./components/InputNumber"
 import InputSelector from "./components/InputSelector"
 import { Switch } from "antd"
+import StyledButton from "../../common/Button"
 
 interface InformationManagementProps {
   profile: Escort | null
@@ -32,8 +33,6 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   onUpdate,
 }) => {
   // State for all fields
-  console.log("JUN HEREHERE profile", profile)
-
   const [greeting, setGreeting] = useState(profile?.greeting || "")
   const [name, setName] = useState(profile?.name || "")
   const [age, setAge] = useState(profile?.age?.toString() || "")
@@ -53,6 +52,8 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [contacts, setContacts] = useState<Contact[]>(profile?.contacts || [])
   const [aboutMe, setAboutMe] = useState(profile?.aboutMe || "")
   const [availability, setAvailability] = useState(profile?.availability || "")
+
+  const [loading, setLoading] = useState(false)
 
   // timeTable is an array of objects
   const [timeTable, setTimeTable] = useState<TimeTable[]>(
@@ -138,9 +139,10 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     }
   }, [profile])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onUpdate({
+    setLoading(true)
+    await onUpdate({
       greeting,
       name,
       age: isNaN(parseInt(age)) ? 0 : parseInt(age),
@@ -176,6 +178,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
         roleplayPreference,
       },
     })
+    setLoading(false)
   }
 
   const handleSetAddress = (newAddress: Address) => {
@@ -482,10 +485,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
             setIsPreferencesActive={setIsPreferencesActive}
           />,
         )}
-
-        <button type="submit" className="vogue-button w-full sm:w-auto">
-          Save Changes
-        </button>
+        <StyledButton type="submit" label="Save Changes" loading={loading} />
       </form>
     </div>
   )

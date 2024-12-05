@@ -27,6 +27,7 @@ import { db, auth, functions } from "../../../firebase/config"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import { httpsCallable } from "firebase/functions"
 import { Message } from "../../common/Message"
+import { Button, message } from "antd"
 
 const EscortProfileContent: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -92,7 +93,6 @@ const EscortProfileContent: React.FC = () => {
   const handleUpdateProfile = async (
     updatedData: Partial<typeof escortProfile>,
   ) => {
-    setStatusSaveUserProfile("loading")
     if (user && user.userType === "advertiser") {
       const saveEscortProfile = httpsCallable(
         functions,
@@ -102,12 +102,11 @@ const EscortProfileContent: React.FC = () => {
       const data = result.data
       if (data) {
         dispatch(setUserEscortProfile(data as Escort))
-        // Show success message
+        message.success("Profile updated successfully")
       } else {
-        // Show error message
+        message.error("Failed to update profile")
       }
     }
-    setStatusSaveUserProfile("idle")
   }
 
   const navigationItems = [

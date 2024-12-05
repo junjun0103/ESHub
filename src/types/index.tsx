@@ -1,3 +1,6 @@
+//status
+export type Status = "idle" | "loading" | "failed"
+
 // User
 export interface User {
   id: string
