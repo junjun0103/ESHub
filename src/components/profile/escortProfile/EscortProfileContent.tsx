@@ -1,17 +1,13 @@
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useAppSelector, useAppDispatch } from "../../../app/hooks"
 import {
   selectUser,
   selectUserEscortProfile,
   selectUserStatusProfile,
-  setUserEscortProfile,
-  setStatusUserProfile,
-  setUserStories,
-  setStatusSaveUserProfile,
   selectUserStories,
-  setStatusUserStories,
   selectUserStoriesStatus,
+  updateUserEscortProfile,
 } from "../../../features/user/userSlice"
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline"
 import Dashboard from "./Dashboard"
@@ -24,10 +20,10 @@ import PaymentPlans from "./PaymentPlans"
 import VerificationSection from "./VerificationSection"
 import type { Story, Escort } from "../../../types"
 import { db, auth, functions } from "../../../firebase/config"
-import { doc, getDoc, setDoc } from "firebase/firestore"
 import { httpsCallable } from "firebase/functions"
 import { Message } from "../../common/Message"
 import { Button, message } from "antd"
+import type { SaveEscortProfileResponse } from "../../../types/functionTypes"
 
 const EscortProfileContent: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -40,71 +36,26 @@ const EscortProfileContent: React.FC = () => {
   const [activeSection, setActiveSection] = useState("dashboard")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (user && user.userType === "advertiser") {
-        dispatch(setStatusUserProfile("loading"))
-        try {
-          const fetchedEscortProfileById = httpsCallable(
-            functions,
-            "escortProfile-getEscortProfileByUserId",
-          )
-          const result = await fetchedEscortProfileById({ escortId: user.id })
-          if (result.data) {
-            dispatch(setUserEscortProfile(result.data as Escort))
-          }
-        } catch (error) {
-          console.error("Failed to fetch escort profile:", error)
-          dispatch(setStatusUserProfile("failed"))
-        }
-      }
-    }
-
-    const fetchStories = async () => {
-      if (user && user.userType === "advertiser" && !stories) {
-        dispatch(setStatusUserStories("loading"))
-        try {
-          const fetchedStories = await getDoc(doc(db, "stories", user.id))
-          if (!fetchedStories.exists()) {
-            const emptyStory: Story = {
-              id: user.id,
-            }
-            try {
-              await setDoc(doc(db, "stories", user.id), emptyStory)
-              dispatch(setUserStories(emptyStory))
-            } catch (error) {
-              console.error("Failed to create a new profile:", error)
-              dispatch(setStatusUserStories("failed"))
-            }
-          } else {
-            dispatch(setUserStories(fetchedStories.data() as Story))
-          }
-        } catch (error) {
-          console.error("Failed to fetch escort stories:", error)
-          dispatch(setStatusUserStories("failed"))
-        }
-      }
-    }
-
-    fetchProfile()
-    fetchStories()
-  }, [user])
-
-  const handleUpdateProfile = async (
-    updatedData: Partial<typeof escortProfile>,
-  ) => {
+  const handleUpdateProfile = async (updatedData: Partial<Escort>) => {
     if (user && user.userType === "advertiser") {
-      const saveEscortProfile = httpsCallable(
-        functions,
-        "escortProfile-saveEscortProfile",
-      )
-      const result = await saveEscortProfile({ updatedData })
-      const data = result.data
-      if (data) {
-        dispatch(setUserEscortProfile(data as Escort))
-        message.success("Profile updated successfully")
-      } else {
-        message.error("Failed to update profile")
+      const saveEscortProfile = httpsCallable<
+        any, // Input type
+        SaveEscortProfileResponse // Return type
+      >(functions, "escortProfile-saveEscortProfile")
+
+      try {
+        const result = await saveEscortProfile({ updatedData })
+        const data = result.data
+
+        if (data.success) {
+          dispatch(updateUserEscortProfile(data.data))
+          message.success("Profile updated successfully")
+        } else {
+          message.error("Failed to update profile")
+        }
+      } catch (error) {
+        console.error("Error updating profile:", error)
+        message.error("An error occurred while updating the profile.")
       }
     }
   }

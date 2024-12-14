@@ -256,6 +256,7 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   ) => (
     <div className="bg-white shadow rounded-lg mb-4">
       <button
+        type="button"
         className="w-full px-4 py-3 flex justify-between items-center text-left bg-gray-200"
         onClick={() => toggleSection(sectionKey)}
       >

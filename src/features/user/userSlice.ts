@@ -49,6 +49,17 @@ export const userSlice = createSlice({
       state.statusUserProfile = "idle"
       state.error = null
     },
+    updateUserEscortProfile: (
+      state,
+      action: PayloadAction<Partial<Escort>>,
+    ) => {
+      if (state.userEscortProfile) {
+        state.userEscortProfile = {
+          ...state.userEscortProfile,
+          ...action.payload,
+        }
+      }
+    },
     setStatusSaveUserProfile: (
       state,
       action: PayloadAction<"idle" | "loading" | "failed">,
@@ -84,6 +95,7 @@ export const {
   setStatusUserProfile,
   setUserStories,
   setStatusUserStories,
+  updateUserEscortProfile,
 } = userSlice.actions
 
 export const selectUser = (state: RootState) => state.user.currentUser
