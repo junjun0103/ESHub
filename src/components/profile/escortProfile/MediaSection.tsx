@@ -1,6 +1,7 @@
 import type React from "react"
 import { useState } from "react"
 import type { Escort } from "../../../types"
+import type { mediaTypes } from "../../../types/functionTypes"
 import { uploadFile } from "../../../utils/firebase"
 import { CameraIcon, XMarkIcon } from "@heroicons/react/24/outline"
 
@@ -11,13 +12,11 @@ interface MediaSectionProps {
 
 const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
   const [uploading, setUploading] = useState(false)
-  const [activeTab, setActiveTab] = useState<
-    "profile" | "detail" | "selfie" | "video"
-  >("profile")
+  const [activeTab, setActiveTab] = useState<mediaTypes>("profile")
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    type: "profile" | "detail" | "video" | "selfie",
+    type: mediaTypes,
   ) => {
     const files = event.target.files
     if (!files || files.length === 0) return
@@ -59,7 +58,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
             ].slice(0, 10),
           })
           break
-        case "video":
+        case "videos":
           onUpdate({
             videos: [...(profile?.videos || []), ...newMediaUrls].slice(0, 3),
           })
@@ -73,10 +72,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     }
   }
 
-  const handleRemoveMedia = (
-    url: string,
-    type: "profile" | "detail" | "selfie" | "video",
-  ) => {
+  const handleRemoveMedia = (url: string, type: mediaTypes) => {
     switch (type) {
       case "profile":
         onUpdate({
@@ -96,7 +92,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
             profile?.selfiePhotos?.filter(photo => photo !== url) || [],
         })
         break
-      case "video":
+      case "videos":
         onUpdate({
           videos: profile?.videos?.filter(video => video !== url) || [],
         })
@@ -105,30 +101,25 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     // You might also want to delete the file from Firebase Storage here
   }
 
-  const renderUploadButton = (
-    type: "profile" | "detail" | "selfie" | "video",
-  ) => (
+  const renderUploadButton = (type: mediaTypes) => (
     <label className="vogue-button flex items-center justify-center w-full py-3 mb-4">
       <CameraIcon className="w-5 h-5 mr-2" />
-      {type === "video" ? "Upload Video" : "Upload Photo"}
+      {type === "videos" ? "Upload Video" : `Upload ${type} Photo`}
       <input
         type="file"
         onChange={e => handleFileUpload(e, type)}
-        accept={type === "video" ? "video/*" : "image/*"}
+        accept={type === "videos" ? "video/*" : "image/*"}
         multiple
         className="hidden"
       />
     </label>
   )
 
-  const renderMediaGrid = (
-    mediaList: string[],
-    type: "profile" | "detail" | "selfie" | "video",
-  ) => (
+  const renderMediaGrid = (mediaList: string[], type: mediaTypes) => (
     <div className="grid grid-cols-2 gap-4">
       {mediaList.map((media, index) => (
         <div key={index} className="relative group aspect-square">
-          {type === "video" ? (
+          {type === "videos" ? (
             <video
               src={media}
               className="w-full h-full object-cover"
@@ -153,12 +144,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     </div>
   )
 
-  const tabs: Array<"profile" | "detail" | "selfie" | "video"> = [
-    "profile",
-    "detail",
-    "selfie",
-    "video",
-  ]
+  const tabs: Array<mediaTypes> = ["profile", "detail", "selfie", "videos"]
 
   return (
     <div className="vogue-container">

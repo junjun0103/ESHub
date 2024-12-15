@@ -11,3 +11,5 @@ export type updateEscortMediaInput = {
   file: File
   mediaType: string
 }
+
+export type mediaTypes = "profile" | "detail" | "selfie" | "videos"

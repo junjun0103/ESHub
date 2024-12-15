@@ -23,7 +23,10 @@ import { db, auth, functions } from "../../../firebase/config"
 import { httpsCallable } from "firebase/functions"
 import { Message } from "../../common/Message"
 import { Button, message } from "antd"
-import type { SaveEscortProfileResponse } from "../../../types/functionTypes"
+import type {
+  mediaTypes,
+  SaveEscortProfileResponse,
+} from "../../../types/functionTypes"
 
 const EscortProfileContent: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -58,6 +61,18 @@ const EscortProfileContent: React.FC = () => {
         message.error("An error occurred while updating the profile.")
       }
     }
+  }
+
+  const handleUploadMedia = async (files: FileList, type: mediaTypes) => {
+    if (!escortProfile) return
+
+    console.log("JUN handleUploadMedia")
+  }
+
+  const handleUploadStory = async (files: FileList, type: mediaTypes) => {
+    if (!escortProfile) return
+
+    console.log("JUN handleUploadMedia")
   }
 
   const navigationItems = [
