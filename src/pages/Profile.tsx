@@ -40,27 +40,27 @@ const Profile: React.FC = () => {
       }
 
       // Fetch stories
-      dispatch(setStatusUserStories("loading"))
-      try {
-        const fetchedStories = await getDoc(doc(db, "stories", user.id))
-        if (!fetchedStories.exists()) {
-          const emptyStory: Story = {
-            id: user.id,
-          }
-          try {
-            await setDoc(doc(db, "stories", user.id), emptyStory)
-            dispatch(setUserStories(emptyStory))
-          } catch (error) {
-            console.error("Failed to create a new profile:", error)
-            dispatch(setStatusUserStories("failed"))
-          }
-        } else {
-          dispatch(setUserStories(fetchedStories.data() as Story))
-        }
-      } catch (error) {
-        console.error("Failed to fetch escort stories:", error)
-        dispatch(setStatusUserStories("failed"))
-      }
+      // dispatch(setStatusUserStories("loading"))
+      // try {
+      //   const fetchedStories = await getDoc(doc(db, "stories", user.id))
+      //   if (!fetchedStories.exists()) {
+      //     const emptyStory: Story = {
+      //       id: user.id,
+      //     }
+      //     try {
+      //       await setDoc(doc(db, "stories", user.id), emptyStory)
+      //       dispatch(setUserStories(emptyStory))
+      //     } catch (error) {
+      //       console.error("Failed to create a new profile:", error)
+      //       dispatch(setStatusUserStories("failed"))
+      //     }
+      //   } else {
+      //     dispatch(setUserStories(fetchedStories.data() as Story))
+      //   }
+      // } catch (error) {
+      //   console.error("Failed to fetch escort stories:", error)
+      //   dispatch(setStatusUserStories("failed"))
+      // }
     }
 
     fetchInitialData()

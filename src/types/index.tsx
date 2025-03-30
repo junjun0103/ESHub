@@ -1,3 +1,5 @@
+import type { MediaTypes } from "./functionTypes"
+
 //status
 export type Status = "idle" | "loading" | "failed"
 

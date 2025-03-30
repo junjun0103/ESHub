@@ -1,66 +1,53 @@
 import type React from "react"
 import { useState } from "react"
 import type { Escort } from "../../../types"
-import type { mediaTypes } from "../../../types/functionTypes"
-import { uploadFile } from "../../../utils/firebase"
+import type {
+  MediaTypes,
+  uploadEscortMediaInput,
+} from "../../../types/functionTypes"
 import { CameraIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { message } from "antd"
+import { httpsCallable } from "firebase/functions"
+import { functions } from "../../../firebase/config"
 
 interface MediaSectionProps {
   profile: Escort | null
-  onUpdate: (updatedData: Partial<Escort>) => void
+  onUpdate: (input: uploadEscortMediaInput) => {}
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
   const [uploading, setUploading] = useState(false)
-  const [activeTab, setActiveTab] = useState<mediaTypes>("profile")
+  const [activeTab, setActiveTab] = useState<MediaTypes>("profilePhotos")
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    type: mediaTypes,
+    type: MediaTypes,
   ) => {
     const files = event.target.files
     if (!files || files.length === 0) return
 
     setUploading(true)
-    const newMediaUrls: string[] = []
-
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        const fileName = `${Date.now()}_${file.name}`
-        const path = `escorts/${profile?.id}/${type}s/${fileName}`
-        const url = await uploadFile(path, file)
-        newMediaUrls.push(url)
-      }
-
       switch (type) {
-        case "profile":
+        case "profilePhotos":
           onUpdate({
-            profilePhotos: [
-              ...(profile?.profilePhotos || []),
-              ...newMediaUrls,
-            ].slice(0, 3),
+            files: Array.from(files),
+            mediaType: "profilePhotos",
           })
           break
-        case "detail":
-          onUpdate({
-            detailPhotos: [
-              ...(profile?.detailPhotos || []),
-              ...newMediaUrls,
-            ].slice(0, 10),
-          })
+        case "detailPhotos":
+          onUpdate({ files: Array.from(files), mediaType: "detailPhotos" })
           break
-        case "selfie":
+        case "selfiePhotos":
           onUpdate({
-            selfiePhotos: [
-              ...(profile?.selfiePhotos || []),
-              ...newMediaUrls,
-            ].slice(0, 10),
+            files: Array.from(files),
+            mediaType: "selfiePhotos",
           })
           break
         case "videos":
           onUpdate({
-            videos: [...(profile?.videos || []), ...newMediaUrls].slice(0, 3),
+            files: Array.from(files),
+            mediaType: "videos",
           })
           break
       }
@@ -72,36 +59,48 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     }
   }
 
-  const handleRemoveMedia = (url: string, type: mediaTypes) => {
-    switch (type) {
-      case "profile":
-        onUpdate({
-          profilePhotos:
-            profile?.profilePhotos?.filter(photo => photo !== url) || [],
-        })
-        break
-      case "detail":
-        onUpdate({
-          detailPhotos:
-            profile?.detailPhotos?.filter(photo => photo !== url) || [],
-        })
-        break
-      case "selfie":
-        onUpdate({
-          selfiePhotos:
-            profile?.selfiePhotos?.filter(photo => photo !== url) || [],
-        })
-        break
-      case "videos":
-        onUpdate({
-          videos: profile?.videos?.filter(video => video !== url) || [],
-        })
-        break
+  const handleRemoveMedia = async (url: string, type: MediaTypes) => {
+    setUploading(true)
+    try {
+      // Extract the file path from the URL
+      // The URL format should be: https://storage.googleapis.com/BUCKET_NAME/escorts/YEAR/ESCORT_ID/mediaType/MONTH/FILENAME
+      const urlObj = new URL(url)
+      const pathName = urlObj.pathname
+      // Remove the leading slash and the bucket name part
+      const filePath = pathName.substring(pathName.indexOf("/", 1) + 1)
+
+      // Call the Firebase function to delete the media
+      const deleteMedia = httpsCallable(functions, "escortMedia-deleteMedia")
+      const result = await deleteMedia({
+        filePath: filePath,
+        mediaType: type,
+      })
+
+      const data = result.data as {
+        success: boolean
+        updatedUrls: string[]
+      }
+
+      if (data.success) {
+        // The Firebase function has already updated the database
+        // We just need to update our local state to match
+        // The profile in the parent component will update via Redux
+
+        // TODO: update localy the profile state JUN
+
+        message.success("Media deleted successfully")
+      } else {
+        message.error("Failed to delete media")
+      }
+    } catch (error) {
+      console.error("Error removing media:", error)
+      message.error("Failed to remove media file")
+    } finally {
+      setUploading(false)
     }
-    // You might also want to delete the file from Firebase Storage here
   }
 
-  const renderUploadButton = (type: mediaTypes) => (
+  const renderUploadButton = (type: MediaTypes) => (
     <label className="vogue-button flex items-center justify-center w-full py-3 mb-4">
       <CameraIcon className="w-5 h-5 mr-2" />
       {type === "videos" ? "Upload Video" : `Upload ${type} Photo`}
@@ -115,7 +114,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     </label>
   )
 
-  const renderMediaGrid = (mediaList: string[], type: mediaTypes) => (
+  const renderMediaGrid = (mediaList: string[], type: MediaTypes) => (
     <div className="grid grid-cols-2 gap-4">
       {mediaList.map((media, index) => (
         <div key={index} className="relative group aspect-square">
@@ -144,7 +143,12 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     </div>
   )
 
-  const tabs: Array<mediaTypes> = ["profile", "detail", "selfie", "videos"]
+  const tabs: Array<MediaTypes> = [
+    "profilePhotos",
+    "detailPhotos",
+    "selfiePhotos",
+    "videos",
+  ]
 
   return (
     <div className="vogue-container">

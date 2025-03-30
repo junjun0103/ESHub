@@ -7,9 +7,13 @@ export type SaveEscortProfileResponse = {
   data: Escort
 }
 
-export type updateEscortMediaInput = {
-  file: File
-  mediaType: string
+export type uploadEscortMediaInput = {
+  files: File[]
+  mediaType: MediaTypes
 }
 
-export type mediaTypes = "profile" | "detail" | "selfie" | "videos"
+export type MediaTypes =
+  | "profilePhotos"
+  | "detailPhotos"
+  | "selfiePhotos"
+  | "videos"

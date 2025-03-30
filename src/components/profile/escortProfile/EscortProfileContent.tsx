@@ -21,11 +21,11 @@ import VerificationSection from "./VerificationSection"
 import type { Story, Escort } from "../../../types"
 import { db, auth, functions } from "../../../firebase/config"
 import { httpsCallable } from "firebase/functions"
-import { Message } from "../../common/Message"
-import { Button, message } from "antd"
+import { message } from "antd"
 import type {
-  mediaTypes,
+  MediaTypes,
   SaveEscortProfileResponse,
+  uploadEscortMediaInput,
 } from "../../../types/functionTypes"
 
 const EscortProfileContent: React.FC = () => {
@@ -63,16 +63,110 @@ const EscortProfileContent: React.FC = () => {
     }
   }
 
-  const handleUploadMedia = async (files: FileList, type: mediaTypes) => {
-    if (!escortProfile) return
-
-    console.log("JUN handleUploadMedia")
+  const MEDIA_LIMITS = {
+    profilePhotos: 3,
+    detailPhotos: 10,
+    selfiePhotos: 10,
+    videos: 3,
   }
 
-  const handleUploadStory = async (files: FileList, type: mediaTypes) => {
-    if (!escortProfile) return
+  const validateFileType = (fileType: string, mediaType: MediaTypes) => {
+    switch (mediaType) {
+      case "profilePhotos":
+        return fileType.startsWith("image/")
+      case "detailPhotos":
+        return fileType.startsWith("image/")
+      case "selfiePhotos":
+        return fileType.startsWith("image/")
+      case "videos":
+        return fileType.startsWith("video/")
+      default:
+        return false
+    }
+  }
 
-    console.log("JUN handleUploadMedia")
+  const handleFileUpload = async (input: uploadEscortMediaInput) => {
+    try {
+      if (escortProfile === null) return
+
+      // 1. Check existing media count first
+      const existingMedia = escortProfile[input.mediaType] || []
+      const maxAllowed = MEDIA_LIMITS[input.mediaType]
+      const remainingSlots = maxAllowed - existingMedia.length
+
+      // 2. Validate if we can upload any files
+      if (remainingSlots <= 0) {
+        message.error(`Maximum ${maxAllowed} ${input.mediaType} files allowed`)
+        return
+      }
+
+      // 3. Check if user is trying to upload too many files
+      if (input.files.length > remainingSlots) {
+        message.error(
+          `You can only upload ${remainingSlots} more ${input.mediaType} files`,
+        )
+        return
+      }
+
+      const uploadMedia = httpsCallable(functions, "escortMedia-uploadMedia")
+
+      console.log("JUN HERE111")
+
+      // Process each file one by one
+      for (const file of input.files) {
+        // Validate file type
+        if (!validateFileType(file.type, input.mediaType)) {
+          message.error(`Invalid file type for ${file.name}`)
+          continue
+        }
+        console.log("JUN HERE222")
+
+        // Call the Cloud Function to get signed URL
+        const result = await uploadMedia({
+          file: {
+            name: file.name,
+            type: file.type,
+          },
+          mediaType: input.mediaType,
+        })
+        console.log("JUN HERE333")
+
+        const data = result.data as {
+          uploadUrl: string
+          filePath: string
+          publicUrl: string
+          updatedUrls: string[]
+        }
+
+        // Upload the file to the signed URL
+        await fetch(data.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+          },
+          body: file,
+        })
+
+        // Update local state with the new media URLs
+        if (escortProfile) {
+          dispatch(
+            updateUserEscortProfile({
+              ...escortProfile,
+              [input.mediaType]: data.updatedUrls,
+            }),
+          )
+        }
+      }
+
+      message.success("Upload completed successfully")
+    } catch (error) {
+      console.error("Upload error:", error)
+      message.error("Failed to upload files")
+    }
+  }
+
+  const handleUploadStory = async (files: FileList, type: MediaTypes) => {
+    if (!escortProfile) return
   }
 
   const navigationItems = [
@@ -121,10 +215,7 @@ const EscortProfileContent: React.FC = () => {
         )
       case "media":
         return (
-          <MediaSection
-            profile={escortProfile}
-            onUpdate={handleUpdateProfile}
-          />
+          <MediaSection profile={escortProfile} onUpdate={handleFileUpload} />
         )
       case "rates":
         return (
