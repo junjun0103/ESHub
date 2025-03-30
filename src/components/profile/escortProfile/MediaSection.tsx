@@ -1,63 +1,53 @@
 import type React from "react"
 import { useState } from "react"
 import type { Escort } from "../../../types"
-import { uploadFile } from "../../../utils/firebase"
+import type {
+  MediaTypes,
+  uploadEscortMediaInput,
+} from "../../../types/functionTypes"
+import { CameraIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { message } from "antd"
+import { httpsCallable } from "firebase/functions"
+import { functions } from "../../../firebase/config"
 
 interface MediaSectionProps {
   profile: Escort | null
-  onUpdate: (updatedData: Partial<Escort>) => void
+  onUpdate: (input: uploadEscortMediaInput) => {}
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
   const [uploading, setUploading] = useState(false)
+  const [activeTab, setActiveTab] = useState<MediaTypes>("profilePhotos")
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    type: "profile" | "detail" | "video" | "selfie",
+    type: MediaTypes,
   ) => {
     const files = event.target.files
     if (!files || files.length === 0) return
 
     setUploading(true)
-    const newMediaUrls: string[] = []
-
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        const fileName = `${Date.now()}_${file.name}`
-        const path = `escorts/${profile?.id}/${type}s/${fileName}`
-        const url = await uploadFile(path, file)
-        newMediaUrls.push(url)
-      }
-
       switch (type) {
-        case "profile":
+        case "profilePhotos":
           onUpdate({
-            profilePhotos: [
-              ...(profile?.profilePhotos || []),
-              ...newMediaUrls,
-            ].slice(0, 3),
+            files: Array.from(files),
+            mediaType: "profilePhotos",
           })
           break
-        case "detail":
+        case "detailPhotos":
+          onUpdate({ files: Array.from(files), mediaType: "detailPhotos" })
+          break
+        case "selfiePhotos":
           onUpdate({
-            detailPhotos: [
-              ...(profile?.detailPhotos || []),
-              ...newMediaUrls,
-            ].slice(0, 10),
+            files: Array.from(files),
+            mediaType: "selfiePhotos",
           })
           break
-        case "selfie":
+        case "videos":
           onUpdate({
-            selfiePhotos: [
-              ...(profile?.selfiePhotos || []),
-              ...newMediaUrls,
-            ].slice(0, 10),
-          })
-          break
-        case "video":
-          onUpdate({
-            videos: [...(profile?.videos || []), ...newMediaUrls].slice(0, 3),
+            files: Array.from(files),
+            mediaType: "videos",
           })
           break
       }
@@ -69,167 +59,125 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
     }
   }
 
-  const handleRemoveMedia = (
-    url: string,
-    type: "profile" | "detail" | "selfie" | "video",
-  ) => {
-    switch (type) {
-      case "profile":
-        onUpdate({
-          profilePhotos:
-            profile?.profilePhotos.filter(photo => photo !== url) || [],
-        })
-        break
-      case "detail":
-        onUpdate({
-          detailPhotos:
-            profile?.detailPhotos.filter(photo => photo !== url) || [],
-        })
-        break
-      case "selfie":
-        onUpdate({
-          selfiePhotos:
-            profile?.selfiePhotos?.filter(photo => photo !== url) || [],
-        })
-        break
-      case "video":
-        onUpdate({
-          videos: profile?.videos?.filter(video => video !== url) || [],
-        })
-        break
+  const handleRemoveMedia = async (url: string, type: MediaTypes) => {
+    setUploading(true)
+    try {
+      // Extract the file path from the URL
+      // The URL format should be: https://storage.googleapis.com/BUCKET_NAME/escorts/YEAR/ESCORT_ID/mediaType/MONTH/FILENAME
+      const urlObj = new URL(url)
+      const pathName = urlObj.pathname
+      // Remove the leading slash and the bucket name part
+      const filePath = pathName.substring(pathName.indexOf("/", 1) + 1)
+
+      // Call the Firebase function to delete the media
+      const deleteMedia = httpsCallable(functions, "escortMedia-deleteMedia")
+      const result = await deleteMedia({
+        filePath: filePath,
+        mediaType: type,
+      })
+
+      const data = result.data as {
+        success: boolean
+        updatedUrls: string[]
+      }
+
+      if (data.success) {
+        // The Firebase function has already updated the database
+        // We just need to update our local state to match
+        // The profile in the parent component will update via Redux
+
+        // TODO: update localy the profile state JUN
+
+        message.success("Media deleted successfully")
+      } else {
+        message.error("Failed to delete media")
+      }
+    } catch (error) {
+      console.error("Error removing media:", error)
+      message.error("Failed to remove media file")
+    } finally {
+      setUploading(false)
     }
-    // You might also want to delete the file from Firebase Storage here
   }
 
-  const renderUploadSection = (
-    type: "profile" | "detail" | "selfie" | "video",
-    maxCount: number,
-  ) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-300 mb-2">
-        Upload{" "}
-        {type === "profile"
-          ? "Profile Photos"
-          : type === "detail"
-            ? "Detail Photos"
-            : "Videos"}{" "}
-        (Max {maxCount})
-      </label>
-      <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-accent-gold text-gray-900 rounded-md hover:bg-opacity-80 transition-all duration-300">
-        <svg
-          className="w-5 h-5 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          />
-        </svg>
-        Choose Files
-        <input
-          type="file"
-          onChange={e => handleFileUpload(e, type)}
-          accept={type === "video" ? "video/*" : "image/*"}
-          multiple
-          className="hidden"
-        />
-      </label>
-      <span className="ml-3 text-sm text-gray-400">
-        {type === "profile"
-          ? "(PNG, JPG up to 5MB each)"
-          : type === "detail"
-            ? "(PNG, JPG up to 10MB each)"
-            : "(MP4, MOV up to 50MB each)"}
-      </span>
-    </div>
+  const renderUploadButton = (type: MediaTypes) => (
+    <label className="vogue-button flex items-center justify-center w-full py-3 mb-4">
+      <CameraIcon className="w-5 h-5 mr-2" />
+      {type === "videos" ? "Upload Video" : `Upload ${type} Photo`}
+      <input
+        type="file"
+        onChange={e => handleFileUpload(e, type)}
+        accept={type === "videos" ? "video/*" : "image/*"}
+        multiple
+        className="hidden"
+      />
+    </label>
   )
 
-  const renderMediaList = (
-    mediaList: string[],
-    type: "profile" | "detail" | "selfie" | "video",
-  ) => (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+  const renderMediaGrid = (mediaList: string[], type: MediaTypes) => (
+    <div className="grid grid-cols-2 gap-4">
       {mediaList.map((media, index) => (
-        <div key={index} className="relative group">
-          {type === "video" ? (
+        <div key={index} className="relative group aspect-square">
+          {type === "videos" ? (
             <video
               src={media}
-              className="h-32 w-full rounded-md object-cover"
+              className="w-full h-full object-cover"
               controls
             />
           ) : (
             <img
               src={media}
               alt={`${type} ${index + 1}`}
-              className="h-32 w-full rounded-md object-cover"
+              className="w-full h-full object-cover"
             />
           )}
           <button
             onClick={() => handleRemoveMedia(media, type)}
-            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer hover:bg-red-600"
+            className="absolute top-2 right-2 bg-accent p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             aria-label={`Remove ${type}`}
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <XMarkIcon className="w-4 h-4 text-secondary" />
           </button>
         </div>
       ))}
     </div>
   )
 
+  const tabs: Array<MediaTypes> = [
+    "profilePhotos",
+    "detailPhotos",
+    "selfiePhotos",
+    "videos",
+  ]
+
   return (
-    <div className="space-y-8 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">Manage Your Media</h2>
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Manage Media</h2>
+
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex space-x-2 md:space-x-4">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-3 py-2 text-sm whitespace-nowrap transition-all duration-300 ${
+                activeTab === tab
+                  ? "vogue-button"
+                  : "text-primary hover:bg-gray-100"
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Profile Photos (Max 3)
-          </h3>
-          {renderUploadSection("profile", 3)}
-          {renderMediaList(profile?.profilePhotos || [], "profile")}
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Detail Photos (Max 10)
-          </h3>
-          {renderUploadSection("detail", 10)}
-          {renderMediaList(profile?.detailPhotos || [], "detail")}
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Selfie Photos (Max 10)
-          </h3>
-          {renderUploadSection("selfie", 10)}
-          {renderMediaList(profile?.selfiePhotos || [], "selfie")}
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-accent-gold mb-4">
-            Videos (Max 3)
-          </h3>
-          {renderUploadSection("video", 3)}
-          {renderMediaList(profile?.videos || [], "video")}
-        </div>
+        {renderUploadButton(activeTab)}
+        {renderMediaGrid(
+          (profile?.[`${activeTab}Photos` as keyof Escort] as string[]) || [],
+          activeTab,
+        )}
       </div>
 
       {uploading && (

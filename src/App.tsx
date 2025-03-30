@@ -6,23 +6,24 @@ import SignUp from "./pages/SignUp"
 import SignIn from "./pages/SignIn"
 import Profile from "./pages/Profile"
 import EscortDetail from "./pages/EscortDetail"
-import ProtectedRoute from "./components/common/ProtectedRoute"
+import ForgotPassword from "./pages/ForgotPassword"
+import WithAuth from "./firebase/WithAuth"
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/escort/:id" element={<EscortDetail />} />
+        <Route path="/" element={<WithAuth children={<Home />} />} />
+        <Route path="/profile" element={<WithAuth children={<Profile />} />} />
         <Route
-          path="/profile"
-          element={
-            <ProtectedRoute requiredRole="escort">
-              <Profile />
-            </ProtectedRoute>
-          }
+          path="/escort/:id"
+          element={<WithAuth children={<EscortDetail />} />}
+        />
+        <Route path="/login" element={<WithAuth children={<SignIn />} />} />
+        <Route path="/signup" element={<WithAuth children={<SignUp />} />} />
+        <Route
+          path="/forgot-password"
+          element={<WithAuth children={<ForgotPassword />} />}
         />
       </Routes>
     </Router>

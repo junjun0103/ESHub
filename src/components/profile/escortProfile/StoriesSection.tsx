@@ -4,21 +4,24 @@ import { useAppSelector } from "../../../app/hooks"
 import { selectUser } from "../../../features/user/userSlice"
 import { addStory, deleteStory } from "../../../features/stories/storiesAPI"
 import { uploadFile } from "../../../utils/firebase"
-import type { Story, Escort } from "../../../types"
+import type { Story, Escort, StoryEntry } from "../../../types"
 import {
   checkMandatoryFields,
   areMandatoryFieldsComplete,
 } from "../../../utils/profileHelper"
+import {
+  PlusIcon,
+  TrashIcon,
+  EyeIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline"
 
 interface StoriesSectionProps {
   profile: Escort
-  stories: Story[]
+  story: Story | null
 }
 
-const StoriesSection: React.FC<StoriesSectionProps> = ({
-  profile,
-  stories,
-}) => {
+const StoriesSection: React.FC<StoriesSectionProps> = ({ profile, story }) => {
   const user = useAppSelector(selectUser)
   const [newStoryImages, setNewStoryImages] = useState<File[]>([])
   const [newStoryDescription, setNewStoryDescription] = useState("")
@@ -26,7 +29,7 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const filesArray = Array.from(e.target.files).slice(0, 5) // Limit to 5 files
+      const filesArray = Array.from(e.target.files).slice(0, 3) // Limit to 5 files
       setNewStoryImages(filesArray)
     }
   }
@@ -42,61 +45,14 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
       alert("Only premium and diamond members can upload stories.")
       return
     }
-
-    const section = checkMandatoryFields(stories, profile)
-    if (areMandatoryFieldsComplete(section)) {
-      const todayStories = stories.filter(
-        story =>
-          new Date(story.createdAt).toDateString() ===
-          new Date().toDateString(),
-      )
-
-      if (todayStories.length >= 3) {
-        alert("You have reached the limit of 3 stories per day.")
-        return
-      }
-
-      setUploading(true)
-      try {
-        const imageUrls = await Promise.all(
-          newStoryImages.map(image =>
-            uploadFile(`stories/${user.id}/${Date.now()}_${image.name}`, image),
-          ),
-        )
-
-        await addStory({
-          userId: user.id,
-          imageUrls,
-          description: newStoryDescription,
-          createdAt: new Date("2024-08-20T18:00:00Z"),
-          expiresAt: new Date(
-            new Date("2024-08-20T18:00:00Z").getTime() + 24 * 60 * 60 * 1000,
-          ),
-          suburb: profile.suburb,
-          location: profile.location,
-          latitude: -33.8568,
-          longitude: 151.2153,
-          views: 0,
-        })
-
-        setNewStoryImages([])
-        setNewStoryDescription("")
-      } catch (error) {
-        console.error("Error uploading story:", error)
-      } finally {
-        setUploading(false)
-      }
-    } else {
-      alert("Please complete all mandatory sections before uploading story.")
-    }
   }
 
   const handleDeleteStory = (storyId: string) => {
     deleteStory(storyId)
   }
 
-  const getTimeLeft = (expiresAt: Date): string => {
-    const timeLeft = expiresAt.getTime() - Date.now()
+  const getTimeLeft = (expiresAt: number): string => {
+    const timeLeft = expiresAt - Date.now()
     const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
 
     if (hoursLeft > 0) {
@@ -115,37 +71,34 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
   }
 
   return (
-    <div className="space-y-8 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">Stories</h2>
-      <p className="text-center text-gray-300 mb-4">
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Stories</h2>
+      <p className="text-center text-gray-500 mb-4 text-sm">
         You can upload up to 3 stories per day. Stories will be removed after 24
         hours.
       </p>
 
-      {/* ... form for adding new stories ... */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Upload Story Images (Max 5)
+          <label className="vogue-button w-full flex items-center justify-center cursor-pointer">
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Upload Images (Max 3)
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              className="hidden"
+            />
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            className="w-full text-sm text-gray-400
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-full file:border-0
-              file:text-sm file:font-semibold
-              file:bg-accent-gold file:text-white
-              hover:file:bg-accent-gold/80"
-          />
+          {newStoryImages.length > 0 && (
+            <p className="text-sm text-gray-500 mt-2">
+              {newStoryImages.length} image(s) selected
+            </p>
+          )}
         </div>
         <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
+          <label htmlFor="description" className="vogue-subheading block mb-2">
             Story Description
           </label>
           <div className="relative">
@@ -159,10 +112,10 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
               }}
               maxLength={100}
               rows={3}
-              className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-white"
+              className="vogue-input w-full pr-16"
               placeholder="Describe your story (max 100 characters)"
             />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
+            <div className="absolute right-2 bottom-2 bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded">
               {getWordCount(newStoryDescription)}/100
             </div>
           </div>
@@ -170,33 +123,40 @@ const StoriesSection: React.FC<StoriesSectionProps> = ({
         <button
           type="submit"
           disabled={newStoryImages.length === 0 || uploading}
-          className="w-full bg-accent-gold text-gray-900 py-2 px-4 rounded-md font-bold hover:bg-accent-gold/80 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
+          className="vogue-button w-full"
         >
           {uploading ? "Uploading..." : "Add Story"}
         </button>
       </form>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-        {stories.map(story => (
+      <div className="space-y-4">
+        {Object.values(story?.storyEntries || {}).map((entry: StoryEntry) => (
           <div
-            key={story.id}
-            className="bg-gray-800 rounded-lg overflow-hidden"
+            key={entry.id}
+            className="bg-gray-100 rounded-lg overflow-hidden shadow-md"
           >
             <img
-              src={story.imageUrls[0]}
+              src={entry.imageUrls[0]}
               alt="Story"
               className="w-full h-48 object-cover"
             />
             <div className="p-4">
-              <p className="text-sm mb-2">{story.description}</p>
-              <p className="text-xs text-gray-400 mb-2">
-                {getTimeLeft(story.expiresAt)}
-              </p>
-              <p className="text-xs text-gray-400 mb-2">{story.views} views</p>
+              <p className="text-sm mb-2">{entry.description}</p>
+              <div className="flex justify-between items-center text-xs text-gray-500">
+                <span className="flex items-center">
+                  <ClockIcon className="h-4 w-4 mr-1" />
+                  {getTimeLeft(entry.expiresAt)}
+                </span>
+                <span className="flex items-center">
+                  <EyeIcon className="h-4 w-4 mr-1" />
+                  {entry.views} views
+                </span>
+              </div>
               <button
-                onClick={() => handleDeleteStory(story.id)}
-                className="text-red-400 hover:text-red-300 transition-colors"
+                onClick={() => handleDeleteStory(entry.id)}
+                className="vogue-button-secondary w-full mt-2 flex items-center justify-center"
               >
+                <TrashIcon className="h-4 w-4 mr-2" />
                 Delete Story
               </button>
             </div>

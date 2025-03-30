@@ -1,6 +1,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import type { Escort } from "../../../types"
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 
 interface ServiceSectionProps {
   profile: Escort | null
@@ -9,8 +10,8 @@ interface ServiceSectionProps {
 
 interface Service {
   name: string
-  isOffered: boolean
-  isCustom: boolean
+  isOffered?: boolean
+  isCustom?: boolean
 }
 
 const defaultBaseServices: Service[] = [
@@ -44,7 +45,6 @@ const defaultBaseServices: Service[] = [
     isCustom: false,
   },
 ]
-
 const defaultExtraServices: Service[] = []
 
 const ServiceSection: React.FC<ServiceSectionProps> = ({
@@ -55,92 +55,82 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
     useState<Service[]>(defaultBaseServices)
   const [extraServices, setExtraServices] =
     useState<Service[]>(defaultExtraServices)
-  const [baseCustomService, setBaseCustomService] = useState("")
-  const [extraCustomService, setExtraCustomService] = useState("")
+  const [customService, setCustomService] = useState("")
+  const [activeTab, setActiveTab] = useState<"base" | "extra">("base")
 
   useEffect(() => {
     if (profile?.baseServices) {
       const updatedBaseServices = defaultBaseServices.map(service => ({
         ...service,
-        isOffered: profile.baseServices.includes(service.name),
+        isOffered: profile?.baseServices?.includes(service.name),
       }))
-      const baseCustomServices = profile.baseServices.map(service => ({
-        name: service,
-        isOffered: true,
-        isCustom: true,
-      }))
+      const baseCustomServices = profile.baseServices
+        .filter(
+          service =>
+            !defaultBaseServices.some(
+              defaultService => defaultService.name === service,
+            ),
+        )
+        .map(service => ({
+          name: service,
+          isOffered: true,
+          isCustom: true,
+        }))
       setBaseServices([...updatedBaseServices, ...baseCustomServices])
     }
     if (profile?.extraServices) {
-      const updatedExtraervices = defaultExtraServices?.map(service => ({
-        ...service,
-        isOffered: profile?.extraServices?.includes(service.name) || false,
-      }))
-      const extraCustomServices = profile?.extraServices?.map(service => ({
-        name: service,
+      const extraCustomServices = profile.extraServices.map(service => ({
+        name: service.replace("Extra: ", ""),
         isOffered: true,
         isCustom: true,
       }))
-      setExtraServices([...updatedExtraervices, ...extraCustomServices])
+      setExtraServices(extraCustomServices)
     }
   }, [profile])
 
+  useEffect(() => {
+    console.log("JUN activeTab", activeTab)
+  }, [activeTab])
+
   const handleServiceToggle = (index: number, isBase: boolean) => {
-    if (isBase) {
-      const updatedServices = [...baseServices]
-      updatedServices[index].isOffered = !updatedServices[index].isOffered
-      setBaseServices(updatedServices)
-    } else {
-      const updatedServices = [...extraServices]
-      updatedServices[index].isOffered = !updatedServices[index].isOffered
-      setExtraServices(updatedServices)
-    }
+    const services = isBase ? baseServices : extraServices
+    const setServices = isBase ? setBaseServices : setExtraServices
+    const updatedServices = [...services]
+    updatedServices[index].isOffered = !updatedServices[index].isOffered
+    setServices(updatedServices)
   }
 
-  const handleAddCustomService = (isBase: boolean) => {
-    if (isBase) {
-      if (baseCustomService.trim()) {
-        setBaseServices([
-          ...baseServices,
-          { name: baseCustomService.trim(), isOffered: true, isCustom: true },
-        ])
-        setBaseCustomService("")
+  const handleAddCustomService = () => {
+    if (customService.trim()) {
+      const newService = {
+        name: customService.trim(),
+        isOffered: true,
+        isCustom: true,
       }
-    } else {
-      if (extraCustomService.trim() && extraServices.length < 20) {
-        setExtraServices([
-          ...extraServices,
-          { name: extraCustomService.trim(), isOffered: true, isCustom: true },
-        ])
-        setExtraCustomService("")
+      if (activeTab === "base") {
+        setBaseServices([...baseServices, newService])
+      } else {
+        setExtraServices([...extraServices, newService])
       }
+      setCustomService("")
     }
   }
 
   const handleDeleteCustomService = (index: number, isBase: boolean) => {
-    if (isBase) {
-      const updatedServices = [...baseServices]
-      updatedServices.splice(index, 1)
-      setBaseServices(updatedServices)
-    } else {
-      const updatedServices = [...extraServices]
-      updatedServices.splice(index, 1)
-      setExtraServices(updatedServices)
-    }
+    const services = isBase ? baseServices : extraServices
+    const setServices = isBase ? setBaseServices : setExtraServices
+    const updatedServices = services.filter((_, i) => i !== index)
+    setServices(updatedServices)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const offeredBaseServices = [
-      ...baseServices
-        .filter(service => service.isOffered)
-        .map(service => service.name),
-    ]
-    const offeredExtraServices = [
-      ...extraServices
-        .filter(service => service.isOffered)
-        .map(service => `Extra: ${service.name}`),
-    ]
+    const offeredBaseServices = baseServices
+      .filter(service => service.isOffered)
+      .map(service => service.name)
+    const offeredExtraServices = extraServices
+      .filter(service => service.isOffered)
+      .map(service => `Extra: ${service.name}`)
     onUpdate({
       baseServices: offeredBaseServices,
       extraServices: offeredExtraServices,
@@ -148,11 +138,11 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   }
 
   const renderServiceList = (services: Service[], isBase: boolean) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="space-y-2 flex flex-wrap gap-x-2">
       {services.map((service, index) => (
         <div
           key={index}
-          className="flex items-center justify-between bg-gray-800 p-2 rounded"
+          className="flex items-center justify-between bg-gray-100 p-2 rounded"
         >
           <div className="flex items-center">
             <input
@@ -160,11 +150,11 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
               id={`service-${isBase ? "base" : "extra"}-${index}`}
               checked={service.isOffered}
               onChange={() => handleServiceToggle(index, isBase)}
-              className="mr-2 form-checkbox h-5 w-5 text-accent-gold rounded border-gray-600 focus:ring-accent-gold"
+              className="mr-2 form-checkbox h-5 w-5 text-accent rounded focus:ring-accent"
             />
             <label
               htmlFor={`service-${isBase ? "base" : "extra"}-${index}`}
-              className="text-white"
+              className="text-primary text-sm"
             >
               {service.name}
             </label>
@@ -172,21 +162,10 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
           {service.isCustom && (
             <button
               onClick={() => handleDeleteCustomService(index, isBase)}
-              className="text-red-400 hover:text-red-300 transition-colors"
+              className="text-red-500 hover:text-red-600 transition-colors"
               aria-label="Delete service"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <TrashIcon className="h-5 w-5" />
             </button>
           )}
         </div>
@@ -195,71 +174,56 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   )
 
   return (
-    <div className="space-y-8 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">Services Offered</h2>
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Services Offered</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <h3 className="text-2xl font-semibold mb-4 text-accent-gold">
+        <div className="flex space-x-2 mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab("base")}
+            className={`vogue-button flex-1 ${activeTab === "base" ? "vogue-button-active" : ""}`}
+          >
             Base Services
-          </h3>
-          {renderServiceList(baseServices, true)}
-          <div className="flex items-center space-x-2 mt-4">
-            <input
-              type="text"
-              value={baseCustomService}
-              onChange={e => setBaseCustomService(e.target.value)}
-              placeholder="Add custom base service"
-              className="flex-grow p-2 border rounded bg-gray-800 border-gray-700 text-white focus:border-accent-gold focus:ring-accent-gold"
-            />
-            <button
-              type="button"
-              onClick={() => handleAddCustomService(true)}
-              className="bg-accent-gold text-gray-900 px-4 py-2 rounded hover:bg-opacity-80 transition-colors"
-              disabled={baseServices.length >= 30}
-            >
-              Add
-            </button>
-          </div>
-          {baseServices.length >= 30 && (
-            <p className="text-red-400 mt-2">
-              Maximum base services reached (30)
-            </p>
-          )}
-        </div>
-
-        <div>
-          <h3 className="text-2xl font-semibold mb-4 text-accent-gold">
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("extra")}
+            className={`vogue-button flex-1 ${activeTab === "extra" ? "vogue-button-active" : ""}`}
+          >
             Extra Services
-          </h3>
-          {renderServiceList(extraServices, false)}
-          <div className="flex items-center space-x-2 mt-4">
-            <input
-              type="text"
-              value={extraCustomService}
-              onChange={e => setExtraCustomService(e.target.value)}
-              placeholder="Add custom extra service"
-              className="flex-grow p-2 border rounded bg-gray-800 border-gray-700 text-white focus:border-accent-gold focus:ring-accent-gold"
-            />
-            <button
-              type="button"
-              onClick={() => handleAddCustomService(false)}
-              className="bg-accent-gold text-gray-900 px-4 py-2 rounded hover:bg-opacity-80 transition-colors"
-              disabled={extraServices.length >= 20}
-            >
-              Add
-            </button>
-          </div>
-          {extraServices.length >= 20 && (
-            <p className="text-red-400 mt-2">
-              Maximum extra services reached (20)
-            </p>
-          )}
+          </button>
         </div>
 
-        <button
-          type="submit"
-          className="w-full sm:w-auto bg-accent-gold text-gray-900 px-6 py-3 rounded-full hover:bg-opacity-80 transition-colors font-bold mt-8"
-        >
+        {activeTab === "base"
+          ? renderServiceList(baseServices, true)
+          : renderServiceList(extraServices, false)}
+
+        <div className="flex items-center space-x-2 mt-4">
+          <input
+            type="text"
+            value={customService}
+            onChange={e => setCustomService(e.target.value)}
+            placeholder={`Add custom ${activeTab} service`}
+            className="vogue-input flex-grow"
+          />
+          <button
+            type="button"
+            onClick={handleAddCustomService}
+            className="vogue-button-secondary p-2"
+            disabled={
+              (activeTab === "base" && baseServices.length >= 30) ||
+              (activeTab === "extra" && extraServices.length >= 20)
+            }
+          >
+            <PlusIcon className="h-5 w-5" />
+          </button>
+        </div>
+        {((activeTab === "base" && baseServices.length >= 30) ||
+          (activeTab === "extra" && extraServices.length >= 20)) && (
+          <p className="text-red-500 mt-2">Maximum services reached</p>
+        )}
+
+        <button type="submit" className="vogue-button w-full">
           Save Services
         </button>
       </form>

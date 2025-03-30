@@ -1,9 +1,10 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import type { Escort } from "../../../types"
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 
 interface RatesTableProps {
-  profile: Escort | null
+  profile: Escort
   onUpdate: (updatedData: Partial<Escort>) => void
 }
 
@@ -72,142 +73,111 @@ const RatesTable: React.FC<RatesTableProps> = ({ profile, onUpdate }) => {
   }
 
   return (
-    <div className="space-y-6 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">Your Rates Table</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-800">
-                <th className="p-2 text-left min-w-24">
-                  Duration
-                  <p className="text-xs text-gray-300">
-                    (1hr:60;2hr:120;3hr:180)
-                  </p>
-                </th>
-                <th className="p-2 text-left w-24">Incall</th>
-                <th className="p-2 text-left w-24">Outcall</th>
-                <th className="p-2 text-left min-w-40">Description</th>
-                <th className="p-2 text-left w-20">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ratesTable.map((entry, index) => (
-                <tr key={index} className="border-b border-gray-700">
-                  <td className="p-2">
-                    <input
-                      type="number"
-                      value={entry.duration}
-                      onChange={e =>
-                        handleRatesChange(index, "duration", e.target.value)
-                      }
-                      className="w-full p-1 bg-gray-800 border border-gray-600 rounded text-white"
-                      min="10"
-                      step="10"
-                      readOnly={index === 0}
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      type="number"
-                      value={entry.incall}
-                      onChange={e =>
-                        handleRatesChange(index, "incall", e.target.value)
-                      }
-                      className="w-full p-1 bg-gray-800 border border-gray-600 rounded text-white"
-                      min="0"
-                      step="10"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      type="number"
-                      value={entry.outcall}
-                      onChange={e =>
-                        handleRatesChange(index, "outcall", e.target.value)
-                      }
-                      className="w-full p-1 bg-gray-800 border border-gray-600 rounded text-white"
-                      min="0"
-                      step="10"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={entry.description}
-                        onChange={e => {
-                          if (getWordCount(e.target.value) <= 15) {
-                            handleRatesChange(
-                              index,
-                              "description",
-                              e.target.value,
-                            )
-                          }
-                        }}
-                        className="w-full p-1 pr-12 bg-gray-800 border border-gray-600 rounded text-white"
-                        placeholder="Max 15 words"
-                      />
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
-                        {getWordCount(entry.description)}/15
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    {index !== 0 && (
-                      <button
-                        type="button"
-                        onClick={() => removeEntry(index)}
-                        className="text-red-400 hover:text-red-300 transition-colors p-1"
-                        aria-label="Remove rates"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <button
-            type="button"
-            onClick={addNewEntry}
-            className="w-full sm:w-auto bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
-            disabled={ratesTable.length >= 10}
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Your Rates</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {ratesTable.map((entry, index) => (
+          <div key={index} className="bg-gray-100 p-4 rounded-lg space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="vogue-subheading">Duration (minutes)</span>
+              <input
+                type="number"
+                value={entry.duration}
+                onChange={e =>
+                  handleRatesChange(index, "duration", e.target.value)
+                }
+                className="vogue-input w-24 text-right"
+                min="10"
+                step="10"
+                readOnly={index === 0}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="vogue-subheading">Incall</span>
+              <input
+                type="number"
+                value={entry.incall}
+                onChange={e =>
+                  handleRatesChange(index, "incall", e.target.value)
+                }
+                className="vogue-input w-24 text-right"
+                min="0"
+                step="10"
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="vogue-subheading">Outcall</span>
+              <input
+                type="number"
+                value={entry.outcall}
+                onChange={e =>
+                  handleRatesChange(index, "outcall", e.target.value)
+                }
+                className="vogue-input w-24 text-right"
+                min="0"
+                step="10"
+              />
+            </div>
+            <div>
+              <span className="vogue-subheading">Description</span>
+              <div className="relative mt-1">
+                <input
+                  type="text"
+                  value={entry.description}
+                  onChange={e => {
+                    if (getWordCount(e.target.value) <= 15) {
+                      handleRatesChange(index, "description", e.target.value)
+                    }
+                  }}
+                  className="vogue-input w-full pr-16"
+                  placeholder="Max 15 words"
+                />
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded">
+                  {getWordCount(entry.description)}/15
+                </div>
+              </div>
+            </div>
+            {index !== 0 && (
+              <button
+                type="button"
+                onClick={() => removeEntry(index)}
+                className="vogue-button-secondary w-full flex items-center justify-center"
+                aria-label="Remove rates"
+              >
+                <TrashIcon className="h-5 w-5 mr-2" />
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addNewEntry}
+          className="vogue-button w-full flex items-center justify-center"
+          disabled={ratesTable.length >= 10}
+        >
+          <PlusIcon className="h-5 w-5 mr-2" />
+          Add New Entry
+        </button>
+        <div>
+          <label
+            htmlFor="ratesDescription"
+            className="vogue-subheading block mb-2"
           >
-            Add New Entry
-          </button>
+            Description
+          </label>
+          <textarea
+            id="ratesDescription"
+            value={ratesDescription}
+            onChange={e => setRatesDescription(e.target.value)}
+            rows={4}
+            className="vogue-input w-full"
+          />
         </div>
+        <button type="submit" className="vogue-button w-full">
+          Save Rates
+        </button>
       </form>
-      <label className="block text-sm font-medium text-gray-300 mt-3">
-        Description
-      </label>
-      <textarea
-        id="ratesDescription"
-        value={ratesDescription}
-        onChange={e => setRatesDescription(e.target.value)}
-        rows={4}
-        className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-      />
-      <button
-        type="submit"
-        className="w-full sm:w-auto bg-accent-gold text-gray-900 px-6 py-3 rounded-full hover:bg-opacity-80 transition-colors font-bold mt-8"
-      >
-        Save Rates
-      </button>
     </div>
   )
 }

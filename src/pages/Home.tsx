@@ -1,27 +1,33 @@
 import type React from "react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import Layout from "../components/common/Layout"
-import PremiumSection from "../components/home/PremiumSection"
-import EscortsSection from "../components/home/EscortsSection"
 import {
   selectEscortsStatus,
   setEscorts,
   setStatus,
 } from "../features/escorts/escortsSlice"
-import { setStories } from "../features/stories/storiesSlice"
+import { setStories, selectStories } from "../features/stories/storiesSlice"
+import { selectEscorts } from "../features/escorts/escortsSlice"
 import { fetchEscorts } from "../features/escorts/escortsAPI"
 import { fetchStories } from "../features/stories/storiesAPI"
-import NavFilterSection from "../components/home/NavFilterSection"
-import EnhancedStoriesComponent from "../components/escortDetail/EnhancedStoriesComponent"
+import StoriesSection from "../components/escortDetail/StoriesSection"
+import EscortCard from "../components/home/EscortCard"
+import { AnimatePresence, motion } from "framer-motion"
+import { ChevronDownIcon } from "@heroicons/react/24/outline"
+import Filter from "../components/home/Filter"
 
 const Home: React.FC = () => {
   const dispatch = useAppDispatch()
   const status = useAppSelector(selectEscortsStatus)
-  const escorts = useAppSelector(state => state.escorts.escorts)
-  const stories = useAppSelector(state => state.stories.items)
+  const escorts = useAppSelector(selectEscorts)
+  const stories = useAppSelector(selectStories)
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false)
 
   useEffect(() => {
+    console.log("JUN escort", escorts)
+    console.log("JUN stories", stories)
+
     const getEscorts = async () => {
       dispatch(setStatus("loading"))
       try {
@@ -43,23 +49,59 @@ const Home: React.FC = () => {
     getEscorts()
   }, [dispatch])
 
+  const premiumEscorts = escorts.filter(
+    escort =>
+      escort.paymentPlan?.tier === "Premium" ||
+      escort.paymentPlan?.tier === "Diamond",
+  )
+  const regularEscorts = escorts.filter(
+    escort => !premiumEscorts.includes(escort),
+  )
+
   return (
     <Layout>
-      <div className="space-y-8">
-        <section className="mb-8 mt-11">
-          <EnhancedStoriesComponent stories={stories} />
-        </section>
-        <section className="mb-8 mt-11">
-          <PremiumSection escorts={escorts} />
-        </section>
-        <NavFilterSection />
-        <section className="mb-8 mt-11">
-          {status === "loading" && <p>Loading escorts...</p>}
-          {status === "failed" && (
-            <p>Failed to load escorts. Please try again later.</p>
-          )}
-          {status === "idle" && <EscortsSection />}
-        </section>
+      <div className="bg-secondary text-primary">
+        {/* Filter Section */}
+        <Filter />
+
+        {/* Banner */}
+        <div className="bg-accent text-secondary py-12">
+          <div className="vogue-container text-center">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+              Escort Blue: Your Trusted Source for Premium Escorts.
+            </h1>
+            <p className="text-xl md:text-2xl">
+              Mordern, secure platform for New Zealand's top escorts..
+            </p>
+          </div>
+        </div>
+
+        <div className="vogue-container py-16">
+          {/* Stories Section */}
+          <StoriesSection stories={stories} />
+
+          {/* Premium Escorts */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-4">Premium Escorts</h2>
+            <div className="overflow-x-auto">
+              <div className="flex space-x-4 pb-4">
+                {premiumEscorts.map(escort => (
+                  <EscortCard key={escort.id} escort={escort} premium={true} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Regular Escorts */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-4">All Escorts</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {escorts.map(escort => (
+                <EscortCard key={escort.id} escort={escort} premium={false} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   )

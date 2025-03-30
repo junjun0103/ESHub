@@ -3,22 +3,22 @@ import { useState, useEffect } from "react"
 import type { Escort, Story } from "../../../types"
 import ProfileCompletion from "./ProfileCompletion"
 import {
+  ArrowsUpDownIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline"
+import type { ProfileSection } from "../../../utils/profileHelper"
+import {
   checkMandatoryFields,
   calculateCompletionPercentage,
   areMandatoryFieldsComplete,
   getIncompleteMandatorySections,
 } from "../../../utils/profileHelper"
+import { Switch } from "antd"
 
 interface DashboardProps {
-  stories: Story[]
+  stories: Story | null
   profile: Escort | null
   onUpdate: (updatedData: Partial<Escort>) => void
-}
-
-interface ProfileSection {
-  name: string
-  isComplete: boolean
-  isMandatory: boolean
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -26,9 +26,14 @@ const Dashboard: React.FC<DashboardProps> = ({
   profile,
   onUpdate,
 }) => {
-  const [hoveredOption, setHoveredOption] = useState("")
   const [profileSections, setProfileSections] = useState<ProfileSection[]>([])
   const [completionPercentage, setCompletionPercentage] = useState(0)
+  const [isProfileActive, setIsProfileActive] = useState(
+    profile?.isProfileActive || false,
+  )
+  const [isReviewActive, setIsReviewActive] = useState(
+    profile?.isReviewActive || false,
+  )
 
   useEffect(() => {
     if (profile) {
@@ -36,19 +41,16 @@ const Dashboard: React.FC<DashboardProps> = ({
       setProfileSections(sections)
       setCompletionPercentage(calculateCompletionPercentage(sections))
     }
-  }, [profile])
-
-  const handleMouseEnter = (option: string) => {
-    setHoveredOption(option)
-  }
-
-  const handleMouseLeave = () => {
-    setHoveredOption("")
-  }
+  }, [profile, stories])
 
   const handleToggle = (field: "isProfileActive" | "isReviewActive") => {
     if (areMandatoryFieldsComplete(profileSections)) {
       onUpdate({ [field]: !profile?.[field] })
+      if (field === "isProfileActive") {
+        setIsProfileActive(!isProfileActive)
+      } else {
+        setIsReviewActive(!isReviewActive)
+      }
     } else {
       alert(
         "Please complete all mandatory sections before activating your profile.",
@@ -69,70 +71,59 @@ const Dashboard: React.FC<DashboardProps> = ({
   }
 
   return (
-    <div className="space-y-8 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">Dashboard</h2>
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Dashboard</h2>
 
       <ProfileCompletion
         profileSections={profileSections}
         completionPercentage={completionPercentage}
       />
 
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
-        <h3 className="text-xl font-bold mb-4 text-accent-gold">
-          Profile Status
-        </h3>
-        <p className="mb-4">{renderEncouragement()}</p>
+      <div className="mt-8 space-y-6">
+        <div>
+          <h3 className="vogue-subheading mb-2">Profile Status</h3>
+          <p className="text-sm mb-4">{renderEncouragement()}</p>
+        </div>
+
         <div className="space-y-4">
-          <div className="flex items-center justify-between relative">
-            <span
-              onMouseEnter={() => handleMouseEnter("isProfileActive")}
-              onMouseLeave={handleMouseLeave}
-              className="cursor-pointer"
-            >
-              Profile Active Status
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="mr-2">Profile Active Status</span>
+              <InformationCircleIcon
+                className="h-5 w-5 text-gray-400 cursor-help"
+                title={
+                  isProfileActive
+                    ? "Your profile is active, so customers can see it."
+                    : "Your profile is inactive, so customers cannot see it."
+                }
+              />
+            </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={profile?.isProfileActive || false}
+              <Switch
+                checked={isProfileActive}
                 onChange={() => handleToggle("isProfileActive")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-gold rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-gold"></div>
             </label>
-            {hoveredOption === "isProfileActive" && (
-              <div className="absolute top-8 left-0 bg-gray-700 text-white text-sm p-2 rounded z-10">
-                {profile?.isProfileActive
-                  ? "Your profile is active, so customers can see it."
-                  : "Your profile is inactive, so customers cannot see it."}
-              </div>
-            )}
           </div>
 
-          <div className="flex items-center justify-between relative">
-            <span
-              onMouseEnter={() => handleMouseEnter("isReviewActive")}
-              onMouseLeave={handleMouseLeave}
-              className="cursor-pointer"
-            >
-              Reviews Active Status
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="mr-2">Reviews Active Status</span>
+              <InformationCircleIcon
+                className="h-5 w-5 text-gray-400 cursor-help"
+                title={
+                  isReviewActive
+                    ? "Your review section is visible."
+                    : "Your review section is hidden."
+                }
+              />
+            </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={profile?.isReviewActive || false}
+              <Switch
+                checked={isReviewActive}
                 onChange={() => handleToggle("isReviewActive")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-gold rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-gold"></div>
             </label>
-            {hoveredOption === "isReviewActive" && (
-              <div className="absolute top-8 left-0 bg-gray-700 text-white text-sm p-2 rounded z-10">
-                {profile?.isReviewActive
-                  ? "Your review section is visible."
-                  : "Your review section is hidden."}
-              </div>
-            )}
           </div>
         </div>
       </div>

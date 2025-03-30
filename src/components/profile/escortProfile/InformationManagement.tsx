@@ -1,12 +1,27 @@
 import type React from "react"
 import { useState, useEffect } from "react"
-import Select from "react-select"
-import type { Escort, Language, Contact, TimeTable } from "../../../types"
-import PreferencesSection from "./components/PreferencesSection" // adjust the path as necessary
+import {
+  type Escort,
+  type Language,
+  type Contact,
+  type TimeTable,
+  locationOptions,
+  type Address,
+  ethinicityOptions,
+  escortTypeOptions,
+  escourtServiceOptions,
+} from "../../../types"
+import PreferencesSection from "./components/PreferencesSection"
 import LanguagesAndSmoking from "./components/LanguagesAndSmoking"
-import AboutMe from "../../../pages/components/AboutMe"
 import AboutMeSection from "./components/AboutMeSection"
 import AvailabilitySection from "./components/AvailabilitySection"
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline"
+import AddressAutofillComponent from "./components/AddressAutoFillComponent"
+import InputText from "./components/InputText"
+import InputNumber from "./components/InputNumber"
+import InputSelector from "./components/InputSelector"
+import { Switch } from "antd"
+import StyledButton from "../../common/Button"
 
 interface InformationManagementProps {
   profile: Escort | null
@@ -21,10 +36,10 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [greeting, setGreeting] = useState(profile?.greeting || "")
   const [name, setName] = useState(profile?.name || "")
   const [age, setAge] = useState(profile?.age?.toString() || "")
-  const [suburb, setSuburb] = useState(profile?.suburb || "")
+  const [address, setAddress] = useState<Address>(profile?.address || {})
   const [location, setLocation] = useState(profile?.location || "")
   const [ethnicity, setEthnicity] = useState(profile?.ethnicity || "")
-  const [height, setHeight] = useState(profile?.height?.toString() || "")
+  const [height, setHeight] = useState(profile?.height || "")
   const [weight, setWeight] = useState(profile?.weight?.toString() || "")
   const [hairColor, setHairColor] = useState(profile?.hairColor || "")
   const [hairLength, setHairLength] = useState(profile?.hairLength || "")
@@ -37,10 +52,21 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [contacts, setContacts] = useState<Contact[]>(profile?.contacts || [])
   const [aboutMe, setAboutMe] = useState(profile?.aboutMe || "")
   const [availability, setAvailability] = useState(profile?.availability || "")
-  const [timeTable, setTimeTable] = useState<TimeTable[]>(
-    profile?.timeTable || [],
-  )
 
+  const [loading, setLoading] = useState(false)
+
+  // timeTable is an array of objects
+  const [timeTable, setTimeTable] = useState<TimeTable[]>(
+    profile?.timeTable || [
+      { day: "Monday", from: "", until: "", status: false },
+      { day: "Tuesday", from: "", until: "", status: false },
+      { day: "Wednesday", from: "", until: "", status: false },
+      { day: "Thursday", from: "", until: "", status: false },
+      { day: "Friday", from: "", until: "", status: false },
+      { day: "Saturday", from: "", until: "", status: false },
+      { day: "Sunday", from: "", until: "", status: false },
+    ],
+  )
   const [isSpecialEventActive, setIsSpecialEventActive] = useState(
     profile?.isSpecialEventActive || false,
   )
@@ -51,27 +77,26 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
   const [escortType, setEscortType] = useState(profile?.escortType || "")
   const [serviceType, setServiceType] = useState(profile?.serviceType || "")
   const [favoritePosition, setFavoritePosition] = useState(
-    profile?.favoritePosition || "",
+    profile?.preferences?.favoritePosition || "",
   )
   const [oralPreference, setOralPreference] = useState(
-    profile?.oralPreference || "",
+    profile?.preferences?.oralPreference || "",
   )
   const [experiencePace, setExperiencePace] = useState(
-    profile?.experiencePace || "",
+    profile?.preferences?.experiencePace || "",
   )
   const [touchPreference, setTouchPreference] = useState(
-    profile?.touchPreference || "",
+    profile?.preferences?.touchPreference || "",
   )
   const [roleplayPreference, setRoleplayPreference] = useState(
-    profile?.roleplayPreference || "",
+    profile?.preferences?.roleplayPreference || "",
   )
   const [isPreferencesActive, setIsPreferencesActive] = useState(
     profile?.isPreferencesActive || false,
   )
 
-  // State for collapsible sections
   const [openSections, setOpenSections] = useState({
-    greeting: false,
+    greeting: true,
     personalInfo: false,
     physicalAttributes: false,
     languagesAndSmoking: false,
@@ -82,26 +107,12 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     availability: false,
   })
 
-  const suburbOptions = [
-    { value: "Bondi Beach", label: "Bondi Beach" },
-    { value: "Surry Hills", label: "Surry Hills" },
-    { value: "Paddington", label: "Paddington" },
-    // Add more options as needed
-  ]
-
-  const locationOptions = [
-    { value: "Sydney", label: "Sydney" },
-    { value: "Melbourne", label: "Melbourne" },
-    { value: "Brisbane", label: "Brisbane" },
-    // Add more options as needed
-  ]
-
   useEffect(() => {
     if (profile) {
       setGreeting(profile.greeting || "")
       setName(profile.name || "")
       setAge(profile.age?.toString() || "")
-      setSuburb(profile.suburb || "")
+      setAddress(profile.address || {})
       setLocation(profile.location || "")
       setEthnicity(profile.ethnicity || "")
       setHeight(profile.height?.toString() || "")
@@ -120,25 +131,32 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
       setOccupation(profile.occupation || "")
       setEscortType(profile.escortType || "")
       setServiceType(profile.serviceType || "")
-      setFavoritePosition(profile.favoritePosition || "")
-      setOralPreference(profile.oralPreference || "")
-      setExperiencePace(profile.experiencePace || "")
-      setTouchPreference(profile.touchPreference || "")
-      setRoleplayPreference(profile.roleplayPreference || "")
+      setFavoritePosition(profile?.preferences?.favoritePosition || "")
+      setOralPreference(profile?.preferences?.oralPreference || "")
+      setExperiencePace(profile?.preferences?.experiencePace || "")
+      setTouchPreference(profile?.preferences?.touchPreference || "")
+      setRoleplayPreference(profile?.preferences?.roleplayPreference || "")
     }
   }, [profile])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onUpdate({
+    setLoading(true)
+    await onUpdate({
       greeting,
       name,
-      age: parseInt(age),
-      suburb,
+      age: isNaN(parseInt(age)) ? 0 : parseInt(age),
+      address: {
+        ...address,
+      },
+      availability,
+      timeTable: {
+        ...timeTable,
+      },
       location,
       ethnicity,
-      height: parseInt(height),
-      weight: parseInt(weight),
+      height,
+      weight: isNaN(parseInt(weight)) ? 0 : parseInt(weight),
       hairColor,
       hairLength,
       bustSize,
@@ -152,30 +170,24 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
       occupation,
       escortType,
       serviceType,
-      favoritePosition,
-      oralPreference,
-      experiencePace,
-      touchPreference,
-      roleplayPreference,
+      preferences: {
+        favoritePosition,
+        oralPreference,
+        experiencePace,
+        touchPreference,
+        roleplayPreference,
+      },
     })
+    setLoading(false)
   }
 
-  type SectionKey =
-    | "greeting"
-    | "personalInfo"
-    | "physicalAttributes"
-    | "languagesAndSmoking"
-    | "professionalInfo"
-    | "preferences"
-    | "specialEvent"
-    | "aboutMe"
-    | "availability"
+  const handleSetAddress = (newAddress: Address) => {
+    setAddress(newAddress)
+  }
 
-  const toggleSection = (section: SectionKey) => {
+  const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }))
   }
-
-  // Table Handler
   const addLanguage = () => {
     setLanguages([...languages, { name: "", level: "Basic" }])
   }
@@ -212,344 +224,269 @@ const InformationManagement: React.FC<InformationManagementProps> = ({
     setContacts(updatedContacts)
   }
 
-  const addTimeTable = () => {
-    setTimeTable([...timeTable, { day: "Monday", from: "", untill: "" }])
-  }
+  const updateTimeTableStatus = (index: number, status: boolean) => {
+    // Reset the time for the selected index
+    console.log("JUN HERE updateTimeTableStatus", index, status)
 
-  const removeTimeTable = (index: number) => {
-    setTimeTable(timeTable.filter((_, i) => i !== index))
+    const updatedTimeTable = Object.values(timeTable)
+    updatedTimeTable[index] = {
+      ...updatedTimeTable[index],
+      status: status,
+    }
+    setTimeTable(updatedTimeTable)
   }
 
   const updateTimeTable = (
     index: number,
-    field: "day" | "from" | "untill",
+    field: "day" | "from" | "until",
     value: string,
   ) => {
-    const updatedTimeTable = [...timeTable]
-    updatedTimeTable[index][field] = value
+    const updatedTimeTable = Object.values(timeTable)
+    updatedTimeTable[index] = {
+      ...updatedTimeTable[index],
+      [field]: value,
+    }
     setTimeTable(updatedTimeTable)
   }
 
-  // Helper function to render form fields
-  const renderField = (
-    label: string,
-    value: string,
-    setter: React.Dispatch<React.SetStateAction<string>>,
-    type: string = "text",
+  const renderSection = (
+    title: string,
+    sectionKey: keyof typeof openSections,
+    content: React.ReactNode,
   ) => (
-    <div>
-      <label
-        htmlFor={label.toLowerCase()}
-        className="block text-sm font-medium text-gray-300"
+    <div className="bg-white shadow rounded-lg mb-4">
+      <button
+        type="button"
+        className="w-full px-4 py-3 flex justify-between items-center text-left bg-gray-200"
+        onClick={() => toggleSection(sectionKey)}
       >
-        {label}
-      </label>
-      <input
-        type={type}
-        id={label.toLowerCase()}
-        value={value}
-        onChange={e => setter(e.target.value)}
-        className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-        maxLength={label === "Greeting" ? 10 : undefined}
-        placeholder={label === "Greeting" ? "(max 10)Hey or Hello etc" : ""}
-      />
+        <h3 className="vogue-subheading">{title}</h3>
+        {openSections[sectionKey] ? (
+          <ChevronUpIcon className="h-5 w-5" />
+        ) : (
+          <ChevronDownIcon className="h-5 w-5" />
+        )}
+      </button>
+      {openSections[sectionKey] && (
+        <div className="px-4 py-3 border-t bg-gray-100">{content}</div>
+      )}
     </div>
   )
 
   return (
-    <div className="space-y-8 bg-gray-900 text-white p-4 sm:p-8 rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-8">
-        Personal Information
-      </h2>
+    <div className="vogue-container">
+      <h2 className="vogue-heading text-2xl mb-6">Personal Information</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Greeting Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("greeting")}
-          >
-            Greeting* {openSections.greeting ? "▼" : "▶"}
-          </h3>
-          {openSections.greeting && (
-            <div className="space-y-4">
-              {renderField("Greeting", greeting, setGreeting)}
-              {renderField("Name", name, setName)}
-              {renderField("Age", age, setAge, "number")}
-              {/* Suburb Selector with Search */}
-              <div>
-                <label
-                  htmlFor="suburb"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Suburb
-                </label>
-                <Select
-                  id="suburb"
-                  value={suburbOptions.find(option => option.value === suburb)}
-                  onChange={option => setSuburb(option?.value || "")}
-                  options={suburbOptions}
-                  className="mt-1 text-gray-700"
-                  classNamePrefix="react-select"
-                />
-              </div>
-              {/* Location Selector with Search */}
-              <div>
-                <label
-                  htmlFor="location"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Location
-                </label>
-                <Select
-                  id="location"
-                  value={locationOptions.find(
-                    option => option.value === location,
-                  )}
-                  onChange={option => setLocation(option?.value || "")}
-                  options={locationOptions}
-                  className="mt-1 text-gray-700"
-                  classNamePrefix="react-select"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        {renderSection(
+          "*Greeting",
+          "greeting",
+          <div className="space-y-4">
+            <InputText
+              label="Greeting"
+              value={greeting}
+              onChange={setGreeting}
+              placeholder="Greeting message: ex) Hi,"
+              maxLength={10}
+            />
+            <InputText
+              label="Name"
+              value={name}
+              onChange={setName}
+              placeholder="Name"
+              maxLength={10}
+            />
+            <InputNumber
+              label="Age"
+              value={age}
+              onChange={setAge}
+              placeholder="Age"
+              maxLength={2}
+            />
+            <InputSelector
+              label="Location"
+              value={location}
+              onChange={setLocation}
+              options={locationOptions}
+              placeholder="Select location"
+            />
+            <AddressAutofillComponent
+              address={address}
+              onSetAddress={handleSetAddress}
+            />
+          </div>,
+        )}
 
-        {/* aboutMe Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("aboutMe")}
-          >
-            about Me and Contacts* {openSections.aboutMe ? "▼" : "▶"}
-          </h3>
-          {openSections.aboutMe && (
-            <div className="space-y-4">
-              <AboutMeSection
-                aboutMe={aboutMe}
-                setAboutMe={setAboutMe}
-                contacts={contacts}
-                addContact={addContact}
-                updateContact={updateContact}
-                removeContact={removeContact}
+        {renderSection(
+          "*About Me",
+          "aboutMe",
+          <AboutMeSection
+            aboutMe={aboutMe}
+            setAboutMe={setAboutMe}
+            contacts={contacts}
+            addContact={addContact}
+            updateContact={updateContact}
+            removeContact={removeContact}
+          />,
+        )}
+
+        {renderSection(
+          "Availability",
+          "availability",
+          <AvailabilitySection
+            availability={availability}
+            setAvailability={setAvailability}
+            timeTable={timeTable}
+            updateTimeTable={updateTimeTable}
+            updateTimeTableStatus={updateTimeTableStatus}
+          />,
+        )}
+
+        {renderSection(
+          "*Professional Information",
+          "professionalInfo",
+          <div className="space-y-4">
+            <InputSelector
+              label="Escort Type"
+              value={escortType}
+              onChange={setEscortType}
+              options={escortTypeOptions}
+              placeholder="Select escort type"
+            />
+            <InputSelector
+              label="Service Type"
+              value={serviceType}
+              onChange={setServiceType}
+              options={escourtServiceOptions}
+              placeholder="Select service type"
+            />
+          </div>,
+        )}
+
+        {renderSection(
+          "Special Event",
+          "specialEvent",
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="vogue-body mb-2">Active Status</h3>
+              <Switch
+                checked={isSpecialEventActive}
+                onChange={() => setIsSpecialEventActive(!isSpecialEventActive)}
               />
             </div>
-          )}
-        </div>
-
-        {/* Availability Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("availability")}
-          >
-            Availability* {openSections.availability ? "▼" : "▶"}
-          </h3>
-          {openSections.availability && (
-            <div className="space-y-4">
-              <AvailabilitySection
-                availability={availability}
-                setAvailability={setAvailability}
-                timeTable={timeTable}
-                addTimeTable={addTimeTable}
-                updateTimeTable={updateTimeTable}
-                removeTimeTable={removeTimeTable}
+            {isSpecialEventActive && (
+              <textarea
+                value={eventDescription}
+                onChange={e => setEventDescription(e.target.value)}
+                className="vogue-input w-full"
+                placeholder="Event Description"
+                rows={4}
               />
-            </div>
-          )}
-        </div>
+            )}
+          </div>,
+        )}
 
-        {/* Professional Information Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("professionalInfo")}
-          >
-            Professional Information*{" "}
-            {openSections.professionalInfo ? "▼" : "▶"}
-          </h3>
-          {openSections.professionalInfo && (
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="escortType"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Type of Escort
-                </label>
-                <select
-                  id="escortType"
-                  value={escortType}
-                  onChange={e => setEscortType(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                >
-                  <option value="Agency">Agency</option>
-                  <option value="Private">Private</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="serviceType"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Type of Service
-                </label>
-                <select
-                  id="serviceType"
-                  value={serviceType}
-                  onChange={e => setServiceType(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                >
-                  <option value="Full service">Full service</option>
-                  <option value="Massage">Sensual Massage</option>
-                  <option value="Pure Massage">Pure Massage</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
+        {renderSection(
+          "Personal Information",
+          "personalInfo",
+          <div className="space-y-4">
+            <InputSelector
+              label="Enthicity"
+              value={ethnicity}
+              onChange={setEthnicity}
+              options={ethinicityOptions}
+              placeholder="Select Ethnicity"
+            />
+            <InputText
+              label="Occupation"
+              value={occupation}
+              onChange={setOccupation}
+              placeholder="Occupation"
+              maxLength={20}
+            />
+          </div>,
+        )}
 
-        {/* Special Event Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("specialEvent")}
-          >
-            Special Event {openSections.specialEvent ? "▼" : "▶"}
-          </h3>
-          {openSections.specialEvent && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between relative">
-                <span className="cursor-pointer">
-                  Special Event Active Status
-                </span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={isSpecialEventActive || false}
-                    onChange={() =>
-                      setIsSpecialEventActive(!isSpecialEventActive)
-                    }
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-gold rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-gold"></div>
-                </label>
-              </div>
+        {renderSection(
+          "Physical Attributes",
+          "physicalAttributes",
+          <div className="space-y-4">
+            <InputText
+              label="Height"
+              value={height}
+              onChange={setHeight}
+              placeholder="Height"
+              maxLength={8}
+            />
+            <InputText
+              label="Weight"
+              value={weight}
+              onChange={setWeight}
+              placeholder="Weight"
+              maxLength={3}
+            />
+            <InputText
+              label="Hair Color"
+              value={hairColor}
+              onChange={setHairColor}
+              placeholder="Hair Color"
+              maxLength={10}
+            />
+            <InputText
+              label="Hair Length"
+              value={hairLength}
+              onChange={setHairLength}
+              placeholder="Hair Length"
+              maxLength={10}
+            />
+            <InputText
+              label="Bust Size"
+              value={bustSize}
+              onChange={setBustSize}
+              placeholder="Bust Size"
+              maxLength={10}
+            />
+            <InputText
+              label="Body Type"
+              value={bodyType}
+              onChange={setBodyType}
+              placeholder="Body Type"
+              maxLength={10}
+            />
+          </div>,
+        )}
 
-              {isSpecialEventActive && (
-                <div>
-                  <label
-                    htmlFor="eventDescription"
-                    className="block text-sm font-medium text-gray-300"
-                  >
-                    Event Description
-                  </label>
-                  <textarea
-                    id="eventDescription"
-                    value={eventDescription}
-                    onChange={e => setEventDescription(e.target.value)}
-                    rows={4}
-                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:border-accent-gold focus:ring-accent-gold"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {renderSection(
+          "Languages and Smoking",
+          "languagesAndSmoking",
+          <LanguagesAndSmoking
+            languages={languages}
+            smoker={smoker}
+            updateLanguage={updateLanguage}
+            removeLanguage={removeLanguage}
+            addLanguage={addLanguage}
+            setSmoker={setSmoker}
+          />,
+        )}
 
-        {/* Personal Information Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("personalInfo")}
-          >
-            Personal Information {openSections.personalInfo ? "▼" : "▶"}
-          </h3>
-          {openSections.personalInfo && (
-            <div className="space-y-4">
-              {renderField("Ethnicity", ethnicity, setEthnicity)}
-              {renderField("Occupation", occupation, setOccupation)}
-            </div>
-          )}
-        </div>
-
-        {/* Physical Attributes Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("physicalAttributes")}
-          >
-            Physical Attributes {openSections.physicalAttributes ? "▼" : "▶"}
-          </h3>
-          {openSections.physicalAttributes && (
-            <div className="space-y-4">
-              {renderField("Height (cm)", height, setHeight, "number")}
-              {renderField("Weight (kg)", weight, setWeight, "number")}
-              {renderField("Hair Color", hairColor, setHairColor)}
-              {renderField("Hair Length", hairLength, setHairLength)}
-              {renderField("Bust Size", bustSize, setBustSize)}
-              {renderField("Body Type", bodyType, setBodyType)}
-            </div>
-          )}
-        </div>
-
-        {/* Languages and Smoking Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("languagesAndSmoking")}
-          >
-            Languages and Smoking{" "}
-            {openSections.languagesAndSmoking ? "▼" : "▶"}
-          </h3>
-          {openSections.languagesAndSmoking && (
-            <div className="space-y-4">
-              <LanguagesAndSmoking
-                languages={languages}
-                smoker={smoker}
-                updateLanguage={updateLanguage}
-                removeLanguage={removeLanguage}
-                addLanguage={addLanguage}
-                setSmoker={setSmoker}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Preferences Section */}
-        <div>
-          <h3
-            className="text-xl font-semibold mb-2 cursor-pointer"
-            onClick={() => toggleSection("preferences")}
-          >
-            Preferences {openSections.preferences ? "▼" : "▶"}
-          </h3>
-          {openSections.preferences && (
-            <div className="space-y-4">
-              <PreferencesSection
-                favoritePosition={favoritePosition}
-                setFavoritePosition={setFavoritePosition}
-                oralPreference={oralPreference}
-                setOralPreference={setOralPreference}
-                experiencePace={experiencePace}
-                setExperiencePace={setExperiencePace}
-                touchPreference={touchPreference}
-                setTouchPreference={setTouchPreference}
-                roleplayPreference={roleplayPreference}
-                setRoleplayPreference={setRoleplayPreference}
-                isPreferencesActive={isPreferencesActive}
-                setIsPreferencesActive={setIsPreferencesActive}
-              />
-            </div>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="w-full sm:w-auto bg-accent-gold text-gray-900 px-6 py-3 rounded-full hover:bg-opacity-80 transition-colors font-bold"
-        >
-          Save Changes
-        </button>
+        {renderSection(
+          "Preferences",
+          "preferences",
+          <PreferencesSection
+            favoritePosition={favoritePosition}
+            setFavoritePosition={setFavoritePosition}
+            oralPreference={oralPreference}
+            setOralPreference={setOralPreference}
+            experiencePace={experiencePace}
+            setExperiencePace={setExperiencePace}
+            touchPreference={touchPreference}
+            setTouchPreference={setTouchPreference}
+            roleplayPreference={roleplayPreference}
+            setRoleplayPreference={setRoleplayPreference}
+            isPreferencesActive={isPreferencesActive}
+            setIsPreferencesActive={setIsPreferencesActive}
+          />,
+        )}
+        <StyledButton type="submit" label="Save Changes" loading={loading} />
       </form>
     </div>
   )

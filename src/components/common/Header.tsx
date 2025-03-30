@@ -1,187 +1,114 @@
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { motion } from "framer-motion"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { motion, useScroll, useTransform } from "framer-motion"
 import { useAppSelector, useAppDispatch } from "../../app/hooks"
 import { selectUser, setUser } from "../../features/user/userSlice"
-import { logOut } from "../../utils/firebase"
-import {
-  HomeIcon,
-  UserIcon,
-  ArrowLeftEndOnRectangleIcon,
-  ArrowRightEndOnRectangleIcon,
-} from "@heroicons/react/24/solid"
+import { signOut } from "firebase/auth"
+import { auth } from "../../firebase/config"
+import HeaderEscortDetailNav from "./HeaderEscortDetailNav"
 
 const Header: React.FC = () => {
-  const currentUser = useAppSelector(selectUser)
+  const [isExpanded, setIsExpanded] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  const location = useLocation()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
+  const { scrollY } = useScroll()
+
+  const user = useAppSelector(selectUser)
+
+  const isEscortDetailPage = location.pathname.startsWith("/escort/")
+
+  const headerHeight = useTransform(
+    scrollY,
+    [0, 100],
+    [isExpanded ? "120px" : "80px", "80px"],
+  )
+
+  const logoSize = useTransform(
+    scrollY,
+    [0, 100],
+    [isExpanded ? "48px" : "36px", "36px"],
+  )
 
   useEffect(() => {
-    let lastScrollY = window.scrollY
-
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-
       if (currentScrollY > lastScrollY) {
-        setIsScrolled(true)
-      } else if (currentScrollY === 0) {
-        setIsScrolled(false)
+        setIsExpanded(false)
+      } else {
+        setIsExpanded(true)
       }
-
-      lastScrollY = currentScrollY
+      setLastScrollY(currentScrollY)
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [lastScrollY])
 
-  const handleSignOut = async () => {
-    await logOut()
-    dispatch(setUser(null))
-    setIsMenuOpen(false)
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      dispatch(setUser(null))
+      navigate("/")
+    } catch (error) {
+      console.error("Error signing out: ", error)
+    }
   }
 
   return (
-    <header
-      className={`bg-gray-800 text-white shadow-md fixed top-0 left-0 right-0 z-50 bg-opacity-80 transition-all duration-300 ${
-        isScrolled ? "py-1" : "py-3"
-      }`}
+    <motion.header
+      style={{ height: headerHeight }}
+      className="fixed top-0 left-0 right-0 bg-secondary text-primary z-50 transition-all duration-300"
     >
-      <nav
-        className={`px-4 flex justify-between items-center ${isScrolled ? "w-full mr-1 ml-1" : "container mx-auto"}`}
-      >
-        <Link
-          to="/"
-          className={`font-bold text-accent-gold transition-all duration-300 ${
-            isScrolled ? "text-lg" : "text-2xl"
-          }`}
-        >
-          <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            EscortHub
-          </motion.span>
-        </Link>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6 items-center">
-          {isScrolled ? (
-            <>
-              <NavIconLink to="/" icon={<HomeIcon className="w-5 h-5" />} />
-              {currentUser ? (
-                <>
-                  <NavIconLink
-                    to="/profile"
-                    icon={<UserIcon className="w-5 h-5" />}
-                  />
-                  <button onClick={handleSignOut} className="nav-link">
-                    <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
-                  </button>
-                </>
-              ) : (
-                <NavIconLink
-                  to="/signin"
-                  icon={<ArrowLeftEndOnRectangleIcon className="w-5 h-5" />}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              <NavLink to="/">Home</NavLink>
-              {currentUser ? (
-                <>
-                  <NavLink to="/profile">My Profile</NavLink>
-                  <button onClick={handleSignOut} className="nav-link">
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <NavLink to="/signin">Sign In</NavLink>
-                  <NavLink to="/signup">Sign Up</NavLink>
-                </>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-white focus:outline-none"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+      <div className="vogue-container h-full flex flex-col justify-center">
+        <div className="flex items-center justify-between">
+          <motion.div
+            style={{ fontSize: logoSize }}
+            className="font-serif font-bold"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16m-7 6h7"
-            />
-          </svg>
-        </button>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-primary md:hidden">
-            <div className="flex flex-col items-center py-4 space-y-4">
-              <NavLink to="/" onClick={() => setIsMenuOpen(false)}>
-                Home
-              </NavLink>
-              {currentUser ? (
+            <Link to="/">VOGUE</Link>
+          </motion.div>
+          <nav>
+            <ul className="flex space-x-6">
+              {user ? (
                 <>
-                  <NavLink to="/profile" onClick={() => setIsMenuOpen(false)}>
-                    My Profile
-                  </NavLink>
-                  <button onClick={handleSignOut} className="nav-link">
-                    Sign Out
-                  </button>
+                  <li>
+                    <Link to="/profile" className="hover:text-accent">
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={handleLogout}
+                      className="hover:text-accent"
+                    >
+                      Logout
+                    </button>
+                  </li>
                 </>
               ) : (
                 <>
-                  <NavLink to="/signin" onClick={() => setIsMenuOpen(false)}>
-                    Sign In
-                  </NavLink>
-                  <NavLink to="/signup" onClick={() => setIsMenuOpen(false)}>
-                    Sign Up
-                  </NavLink>
+                  <li>
+                    <Link to="/login" className="hover:text-accent">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/signup" className="hover:text-accent">
+                      Sign Up
+                    </Link>
+                  </li>
                 </>
               )}
-            </div>
-          </div>
-        )}
-      </nav>
-    </header>
+            </ul>
+          </nav>
+        </div>
+        {isEscortDetailPage && isExpanded && <HeaderEscortDetailNav />}
+      </div>
+    </motion.header>
   )
 }
-
-const NavLink: React.FC<{
-  to: string
-  children: React.ReactNode
-  onClick?: () => void
-}> = ({ to, children, onClick }) => (
-  <Link to={to} className="nav-link" onClick={onClick}>
-    <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-      {children}
-    </motion.span>
-  </Link>
-)
-
-const NavIconLink: React.FC<{
-  to: string
-  icon: React.ReactNode
-  onClick?: () => void
-}> = ({ to, icon, onClick }) => (
-  <Link to={to} className="nav-link" onClick={onClick}>
-    <motion.span whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-      {icon}
-    </motion.span>
-  </Link>
-)
 
 export default Header
