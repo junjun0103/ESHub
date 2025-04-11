@@ -85,33 +85,31 @@ const EscortProfileContent: React.FC = () => {
     }
   }
 
-  const handleFileUpload = async (input: uploadEscortMediaInput) => {
+  const handleFileUpload = async (input: uploadEscortMediaInput): Promise<any> => {
     try {
-      if (escortProfile === null) return
-
+      if (escortProfile === null) return null;
+  
       // 1. Check existing media count first
       const existingMedia = escortProfile[input.mediaType] || []
       const maxAllowed = MEDIA_LIMITS[input.mediaType]
       const remainingSlots = maxAllowed - existingMedia.length
-
+  
       // 2. Validate if we can upload any files
       if (remainingSlots <= 0) {
         message.error(`Maximum ${maxAllowed} ${input.mediaType} files allowed`)
-        return
+        return null;
       }
-
+  
       // 3. Check if user is trying to upload too many files
       if (input.files.length > remainingSlots) {
         message.error(
           `You can only upload ${remainingSlots} more ${input.mediaType} files`,
         )
-        return
+        return null;
       }
-
+  
       const uploadMedia = httpsCallable(functions, "escortMedia-uploadMedia")
-
-      console.log("JUN HERE111")
-
+  
       // Process each file one by one
       for (const file of input.files) {
         // Validate file type
@@ -119,8 +117,7 @@ const EscortProfileContent: React.FC = () => {
           message.error(`Invalid file type for ${file.name}`)
           continue
         }
-        console.log("JUN HERE222")
-
+  
         // Call the Cloud Function to get signed URL
         const result = await uploadMedia({
           file: {
@@ -129,15 +126,14 @@ const EscortProfileContent: React.FC = () => {
           },
           mediaType: input.mediaType,
         })
-        console.log("JUN HERE333")
-
+  
         const data = result.data as {
           uploadUrl: string
           filePath: string
           publicUrl: string
           updatedUrls: string[]
         }
-
+  
         // Upload the file to the signed URL
         await fetch(data.uploadUrl, {
           method: "PUT",
@@ -146,7 +142,7 @@ const EscortProfileContent: React.FC = () => {
           },
           body: file,
         })
-
+  
         // Update local state with the new media URLs
         if (escortProfile) {
           dispatch(
@@ -157,11 +153,12 @@ const EscortProfileContent: React.FC = () => {
           )
         }
       }
-
-      message.success("Upload completed successfully")
+  
+      return true; // Return successful completion
     } catch (error) {
       console.error("Upload error:", error)
       message.error("Failed to upload files")
+      throw error; // Re-throw to allow the child component to handle it
     }
   }
 

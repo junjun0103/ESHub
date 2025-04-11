@@ -12,7 +12,7 @@ import { functions } from "../../../firebase/config"
 
 interface MediaSectionProps {
   profile: Escort | null
-  onUpdate: (input: uploadEscortMediaInput) => {}
+  onUpdate: (input: uploadEscortMediaInput) => Promise<any> 
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
@@ -28,32 +28,16 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
 
     setUploading(true)
     try {
-      switch (type) {
-        case "profilePhotos":
-          onUpdate({
-            files: Array.from(files),
-            mediaType: "profilePhotos",
-          })
-          break
-        case "detailPhotos":
-          onUpdate({ files: Array.from(files), mediaType: "detailPhotos" })
-          break
-        case "selfiePhotos":
-          onUpdate({
-            files: Array.from(files),
-            mediaType: "selfiePhotos",
-          })
-          break
-        case "videos":
-          onUpdate({
-            files: Array.from(files),
-            mediaType: "videos",
-          })
-          break
-      }
+      const uploadInput: uploadEscortMediaInput = {
+        files: Array.from(files),
+        mediaType: type
+      };
+      
+      await onUpdate(uploadInput);
+      message.success(`${type} uploaded successfully`);
     } catch (error) {
       console.error("Error uploading files:", error)
-      // You might want to show an error message to the user here
+      message.error("Failed to upload files");
     } finally {
       setUploading(false)
     }
@@ -83,11 +67,6 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
 
       if (data.success) {
         // The Firebase function has already updated the database
-        // We just need to update our local state to match
-        // The profile in the parent component will update via Redux
-
-        // TODO: update localy the profile state JUN
-
         message.success("Media deleted successfully")
       } else {
         message.error("Failed to delete media")
@@ -110,6 +89,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
         accept={type === "videos" ? "video/*" : "image/*"}
         multiple
         className="hidden"
+        disabled={uploading}
       />
     </label>
   )
@@ -135,6 +115,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
             onClick={() => handleRemoveMedia(media, type)}
             className="absolute top-2 right-2 bg-accent p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             aria-label={`Remove ${type}`}
+            disabled={uploading}
           >
             <XMarkIcon className="w-4 h-4 text-secondary" />
           </button>
@@ -165,6 +146,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
                   ? "vogue-button"
                   : "text-primary hover:bg-gray-100"
               }`}
+              disabled={uploading}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -175,7 +157,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ profile, onUpdate }) => {
       <div className="space-y-6">
         {renderUploadButton(activeTab)}
         {renderMediaGrid(
-          (profile?.[`${activeTab}Photos` as keyof Escort] as string[]) || [],
+          (profile?.[activeTab] as string[]) || [],
           activeTab,
         )}
       </div>
